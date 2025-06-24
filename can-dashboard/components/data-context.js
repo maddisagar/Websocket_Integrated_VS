@@ -95,8 +95,54 @@ export const DataProvider = ({ children }) => {
       console.error("WebSocket error:", error)
     }
 
+    // Add interval to simulate dynamic data update every 1 second if not connected
+    const intervalId = setInterval(() => {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        setCurrentData((prevData) => {
+          // Create new data with slight random variations for testing
+          const newData = {
+            ...prevData,
+            timestamp: new Date().toISOString(),
+            status615: Object.fromEntries(
+              Object.entries(prevData.status615).map(([key, value]) => [
+                key,
+                Math.random() > 0.5 ? !value : value,
+              ])
+            ),
+            temp616: {
+              CtlrTemp1: (prevData.temp616.CtlrTemp1 + (Math.random() * 2 - 1)).toFixed(1),
+              CtlrTemp2: (prevData.temp616.CtlrTemp2 + (Math.random() * 2 - 1)).toFixed(1),
+              CtlrTemp: (prevData.temp616.CtlrTemp + (Math.random() * 2 - 1)).toFixed(1),
+              MtrTemp: (prevData.temp616.MtrTemp + (Math.random() * 2 - 1)).toFixed(1),
+            },
+            measurement617: {
+              AcCurrMeaRms: (prevData.measurement617.AcCurrMeaRms + (Math.random() * 2 - 1)).toFixed(1),
+              DcCurrEstd: (prevData.measurement617.DcCurrEstd + (Math.random() * 2 - 1)).toFixed(1),
+              DcBusVolt: (prevData.measurement617.DcBusVolt + (Math.random() * 2 - 1)).toFixed(1),
+              Mtrspd: Math.min(Math.max(prevData.measurement617.Mtrspd + Math.floor(Math.random() * 21 - 10), 0), 3000),
+              ThrotVolt: (prevData.measurement617.ThrotVolt + (Math.random() * 0.2 - 0.1)).toFixed(1),
+            },
+          }
+          // Convert string values back to numbers
+          newData.temp616 = Object.fromEntries(
+            Object.entries(newData.temp616).map(([k, v]) => [k, parseFloat(v)])
+          )
+          newData.measurement617 = Object.fromEntries(
+            Object.entries(newData.measurement617).map(([k, v]) => [k, parseFloat(v)])
+          )
+          // Update history with new data, keep max 100 entries
+          setHistory((prevHistory) => {
+            const updated = [...prevHistory, newData]
+            return updated.slice(-100)
+          })
+          return newData
+        })
+      }
+    }, 1000)
+
     return () => {
       ws.close()
+      clearInterval(intervalId)
     }
   }, [])
 

@@ -3,8 +3,9 @@
 import { useState } from "react"
 import { useData } from "./data-context"
 import Chart from "./chart"
+import CustomDropdown from "./custom-dropdown"
 
-export default function GraphContainer({ mode, fullView = false }) {
+export default function GraphContainer({ mode, fullView = false, darkMode = true }) {
   const { history } = useData()
   const [selectedGraphs, setSelectedGraphs] = useState([])
   const [quadSelection, setQuadSelection] = useState(["DcBusVolt", "Mtrspd", "AcCurrMeaRms", "MtrTemp"])
@@ -50,7 +51,7 @@ export default function GraphContainer({ mode, fullView = false }) {
         <div className={`graphs-grid ${fullView ? "full-view" : ""}`}>
           {allMetrics.map((metric) => (
             <div key={metric.key} className="graph-card">
-              <Chart data={history} metric={metric} height={fullView ? 300 : 200} />
+            <Chart data={history} metric={metric} height={fullView ? 300 : 200} darkMode={darkMode} />
             </div>
           ))}
         </div>
@@ -127,6 +128,7 @@ export default function GraphContainer({ mode, fullView = false }) {
               metrics={allMetrics.filter((m) => selectedGraphs.includes(m.key))}
               height={400}
               overlay={true}
+              darkMode={darkMode}
             />
           </div>
         )}
@@ -205,14 +207,13 @@ export default function GraphContainer({ mode, fullView = false }) {
         <div className="quad-selectors">
           {[0, 1, 2, 3].map((index) => (
             <div key={index} className="quad-selector">
-              <label>Graph {index + 1}:</label>
-              <select value={quadSelection[index]} onChange={(e) => updateQuadSelection(index, e.target.value)}>
-                {allMetrics.map((metric) => (
-                  <option key={metric.key} value={metric.key}>
-                    {metric.label}
-                  </option>
-                ))}
-              </select>
+              <CustomDropdown
+                options={allMetrics.map((metric) => ({ value: metric.key, label: metric.label }))}
+                value={quadSelection[index]}
+                onChange={(value) => updateQuadSelection(index, value)}
+                label={`Graph ${index + 1}:`}
+                darkMode={darkMode}
+              />
             </div>
           ))}
         </div>
@@ -222,7 +223,7 @@ export default function GraphContainer({ mode, fullView = false }) {
             const metric = allMetrics.find((m) => m.key === metricKey)
             return (
               <div key={index} className="quad-chart">
-                <Chart data={history} metric={metric} height={250} />
+                <Chart data={history} metric={metric} height={250} darkMode={darkMode} />
               </div>
             )
           })}

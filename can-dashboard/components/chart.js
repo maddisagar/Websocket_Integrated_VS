@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 
-export default function Chart({ data, metric, metrics, height = 200, overlay = false }) {
+export default function Chart({ data, metric, metrics, height = 200, overlay = false, darkMode = true }) {
   const canvasRef = useRef(null)
   const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, content: "" })
   const [isMobile, setIsMobile] = useState(false)
@@ -126,16 +126,21 @@ export default function Chart({ data, metric, metrics, height = 200, overlay = f
           ctx.fillText(value.toFixed(1), 5, y + 4)
         }
 
-        // Title
+        // Title and Unit on same line with bold and improved styling
         ctx.font =
-          "bold 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+          "bold 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
         ctx.fillStyle = currentMetric.color
-        ctx.fillText(currentMetric.label, padding.left, 15)
+        ctx.fillText(currentMetric.label, padding.left, 18)
 
-        // Unit
-        ctx.font = "12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
-        ctx.fillStyle = "#94a3b8"
-        ctx.fillText(currentMetric.unit || "", padding.left + ctx.measureText(currentMetric.label).width + 10, 15)
+        if (currentMetric.unit) {
+          const labelWidth = ctx.measureText(currentMetric.label).width
+          ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+          ctx.fillStyle = darkMode ? "rgba(241, 245, 249, 1)" : "#334155" // white for dark mode, dark slate gray for light mode
+          ctx.shadowColor = darkMode ? "rgba(0, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.3)" // subtle dark shadow for light mode
+          ctx.shadowBlur = 2
+          ctx.fillText(currentMetric.unit, padding.left + labelWidth + 10, 18) // same baseline, small gap
+          ctx.shadowBlur = 0
+        }
       }
     })
 
