@@ -1,15 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useData } from "./data-context"
 import { Download, Search } from "lucide-react"
+import jsPDF from "jspdf"
 
 export default function HistoryView() {
   const { history } = useData()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
+  const [exportFormat, setExportFormat] = useState("json") // new state for export format
+  const [now, setNow] = useState(Date.now()) // state to trigger re-render for dynamic time update
   const itemsPerPage = 20
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(Date.now())
+    }, 1000) // update every second
+
+    return () => clearInterval(interval)
+  }, [])
 
   const categories = [
     { value: "all", label: "All Data" },
@@ -28,14 +39,59 @@ export default function HistoryView() {
   const paginatedHistory = filteredHistory.slice(startIndex, startIndex + itemsPerPage)
 
   const exportData = () => {
-    const dataStr = JSON.stringify(history, null, 2)
-    const dataBlob = new Blob([dataStr], { type: "application/json" })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `can-data-${new Date().toISOString().split("T")[0]}.json`
-    link.click()
-    URL.revokeObjectURL(url)
+    if (exportFormat === "json") {
+      const dataStr = JSON.stringify(history, null, 2)
+      const dataBlob = new Blob([dataStr], { type: "application/json" })
+      const url = URL.createObjectURL(dataBlob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `can-data-${new Date().toISOString().split("T")[0]}.json`
+      link.click()
+      URL.revokeObjectURL(url)
+    } else if (exportFormat === "pdf") {
+      exportPDF()
+    }
+  }
+
+  const exportPDF = () => {
+    const doc = new jsPDF()
+    doc.setFontSize(12)
+    doc.text("CAN Data History", 10, 10)
+    let y = 20
+    history.forEach((item, index) => {
+      if (y > 280) {
+        doc.addPage()
+        y = 10
+      }
+      doc.text(`${index + 1}. Timestamp: ${new Date(item.timestamp).toLocaleString()}`, 10, y)
+      y += 7
+      if (item.status615) {
+        doc.text("  Status (0x615):", 10, y)
+        y += 7
+        Object.entries(item.status615).forEach(([key, value]) => {
+          doc.text(`    ${key}: ${value}`, 10, y)
+          y += 7
+        })
+      }
+      if (item.temp616) {
+        doc.text("  Temperature (0x616):", 10, y)
+        y += 7
+        Object.entries(item.temp616).forEach(([key, value]) => {
+          doc.text(`    ${key}: ${value}`, 10, y)
+          y += 7
+        })
+      }
+      if (item.measurement617) {
+        doc.text("  Measurements (0x617):", 10, y)
+        y += 7
+        Object.entries(item.measurement617).forEach(([key, value]) => {
+          doc.text(`    ${key}: ${value}`, 10, y)
+          y += 7
+        })
+      }
+      y += 5
+    })
+    doc.save(`can-data-${new Date().toISOString().split("T")[0]}.pdf`)
   }
 
   const renderDataSection = (data, title, category) => {
@@ -90,6 +146,16 @@ export default function HistoryView() {
                 {cat.label}
               </option>
             ))}
+          </select>
+
+          <select
+            value={exportFormat}
+            onChange={(e) => setExportFormat(e.target.value)}
+            className="category-filter"
+            aria-label="Select export format"
+          >
+            <option value="json">Export JSON</option>
+            <option value="pdf">Export PDF</option>
           </select>
 
           <button className="export-btn" onClick={exportData}>

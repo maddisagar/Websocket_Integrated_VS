@@ -1,6 +1,4 @@
-"use client"
-
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useData } from "./data-context"
 import Header from "./header"
 import GraphContainer from "./graph-container"
@@ -9,6 +7,11 @@ import { Activity, BarChart3, Grid3X3 } from "lucide-react"
 import SystemAlerts from "./system-alerts"
 import PerformanceMetrics from "./performance-metrics"
 import EnhancedStatusCards from "./enhanced-status-cards"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { ScrollToPlugin } from "gsap/ScrollToPlugin"
+
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 export default function Dashboard() {
   const [darkMode, setDarkMode] = useState(true)
@@ -19,6 +22,22 @@ export default function Dashboard() {
   const toggleTheme = () => {
     setDarkMode(!darkMode)
   }
+
+  useEffect(() => {
+    gsap.to(window, {
+      scrollTo: { y: 0, autoKill: false },
+      duration: 2.0,
+      ease: "power4.out",
+      overwrite: "auto",
+    })
+
+    ScrollTrigger.create({
+      trigger: "body",
+      start: "top top",
+      end: "bottom bottom",
+      scrub: 1,
+    })
+  }, [])
 
   return (
     <div className={`app ${darkMode ? "dark" : "light"}`}>
@@ -59,7 +78,7 @@ export default function Dashboard() {
                 Quad View
               </button>
             </div>
-      <GraphContainer mode={graphMode} darkMode={darkMode} />
+            <GraphContainer mode={graphMode} darkMode={darkMode} />
           </>
         )}
 
