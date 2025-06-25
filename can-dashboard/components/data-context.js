@@ -150,7 +150,112 @@ function calculateAlerts(currentData) {
 export const DataProvider = ({ children }) => {
   const [currentData, setCurrentData] = useState(sampleWebSocketData)
   const [history, setHistory] = useState([sampleWebSocketData])
+  const [dailyReports, setDailyReports] = useState(() => {
+    // Load from localStorage if available
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("dailyReports")
+      return stored ? JSON.parse(stored) : {}
+    }
+    return {}
+  })
   const [isConnected, setIsConnected] = useState(false)
+
+  // Save dailyReports to localStorage on change
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dailyReports", JSON.stringify(dailyReports))
+    }
+  }, [dailyReports])
+
+  // Aggregate daily report from history for a given date (YYYY-MM-DD)
+  const aggregateDailyReport = (date) => {
+    if (!history || history.length === 0) return null
+    const dayData = history.filter((item) => item.timestamp.startsWith(date))
+    if (dayData.length === 0) return null
+
+    const criticalAlertsCount = dayData.reduce((count, item) => {
+      // Assuming alerts are calculated elsewhere, count critical alerts in dayData
+      // For demo, count status615.LimpHomeMode occurrences as critical alerts
+      return count + (item.status615?.LimpHomeMode ? 1 : 0)
+    }, 0)
+
+    const systemModesCounts = {
+      regenMode: dayData.reduce((sum, item) => sum + (item.status615?.RegeMode ? 1 : 0), 0),
+      ascMode: dayData.reduce((sum, item) => sum + (item.status615?.AscMode ? 1 : 0), 0),
+      hillHold: dayData.reduce((sum, item) => sum + (item.status615?.HillholdMode ? 1 : 0), 0),
+      limp: dayData.reduce((sum, item) => sum + (item.status615?.LimpHomeMode ? 1 : 0), 0),
+      idleShutdown: dayData.reduce((sum, item) => sum + (item.status615?.IdleShutdown ? 1 : 0), 0),
+    }
+
+    const motorTemps = dayData.map((item) => item.temp616?.MtrTemp).filter((t) => typeof t === "number")
+    const controllerTemps1 = dayData.map((item) => item.temp616?.CtlrTemp1).filter((t) => typeof t === "number")
+    const controllerTemps2 = dayData.map((item) => item.temp616?.CtlrTemp2).filter((t) => typeof t === "number")
+
+    const minMotorTemp = motorTemps.length ? Math.min(...motorTemps) : null
+    const maxMotorTemp = motorTemps.length ? Math.max(...motorTemps) : null
+
+    const minControllerTemp =
+      controllerTemps1.length && controllerTemps2.length
+        ? Math.min(Math.min(...controllerTemps1), Math.min(...controllerTemps2))
+        : null
+    const maxControllerTemp =
+      controllerTemps1.length && controllerTemps2.length
+        ? Math.max(Math.max(...controllerTemps1), Math.max(...controllerTemps2))
+        : null
+
+    return {
+      criticalAlertsCount,
+      systemModesCounts,
+      temperatureStats: {
+        minMotorTemp,
+        maxMotorTemp,
+        minControllerTemp,
+        maxControllerTemp,
+      },
+    }
+  }
+
+  // Update daily report for current day at midnight or on demand
+  useEffect(() => {
+    const updateDailyReport = () => {
+      const today = new Date().toISOString().slice(0, 10)
+      const report = aggregateDailyReport(today)
+      if (report) {
+        setDailyReports((prev) => ({ ...prev, [today]: report }))
+      }
+    }
+
+    updateDailyReport()
+
+    const now = new Date()
+    const msUntilMidnight =
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime()
+
+    const timeoutId = setTimeout(() => {
+      updateDailyReport()
+      setInterval(updateDailyReport, 24 * 60 * 60 * 1000)
+    }, msUntilMidnight)
+
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [history])
+
+  // Function to get report by date or date range
+  const getReportsByDateRange = (startDate, endDate) => {
+    if (!startDate || !endDate) return null
+    const reports = {}
+    let currentDate = new Date(startDate)
+    const lastDate = new Date(endDate)
+    while (currentDate <= lastDate) {
+      const dateStr = currentDate.toISOString().slice(0, 10)
+      if (dailyReports[dateStr]) {
+        reports[dateStr] = dailyReports[dateStr]
+      }
+      currentDate.setDate(currentDate.getDate() + 1)
+    }
+    return reports
+  }
 
   useEffect(() => {
     const websocketUrl = "ws://your-esp32-websocket-url"
@@ -238,8 +343,10 @@ export const DataProvider = ({ children }) => {
       value={{
         currentData,
         history,
+        dailyReports,
         isConnected,
         alerts,
+        getReportsByDateRange,
       }}
     >
       {children}

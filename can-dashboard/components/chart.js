@@ -40,14 +40,14 @@ const Chart = forwardRef(function Chart({ data, metric, metrics, height = 200, o
     ctx.clearRect(0, 0, width, height)
 
     // Get metrics to draw
-    const metricsToRender = overlay ? metrics : [metric]
+    const metricsToRender = overlay ? metrics : (metrics || [metric])
     if (!metricsToRender || metricsToRender.length === 0) return
 
     // Prepare data points
     const dataPoints = data.slice(-50).map((item, index) => {
       const values = {}
       metricsToRender.forEach((m) => {
-        const value = item[m.category] ? item[m.category][m.key] : 0
+        const value = item && item[m.category] && typeof item[m.category] === "object" && m.key in item[m.category] ? item[m.category][m.key] : 0
         values[m.key] = typeof value === "boolean" ? (value ? 1 : 0) : value || 0
       })
       return { index, timestamp: item.timestamp, ...values }

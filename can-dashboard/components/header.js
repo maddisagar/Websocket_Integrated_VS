@@ -1,6 +1,6 @@
 "use client"
 
-import { Sun, Moon, Activity, BarChart3, History, Wifi, WifiOff, Menu } from 'lucide-react'
+import { Sun, Moon, Activity, BarChart3, BarChart2, History, Wifi, WifiOff, Menu } from 'lucide-react'
 import { useState } from "react"
 
 export default function Header({ darkMode, toggleTheme, isConnected, currentView, setCurrentView }) {
@@ -54,6 +54,13 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
               <History size={18} />
               <span>History</span>
             </button>
+            <button
+              className={`nav-btn ${currentView === "reports" ? "active" : ""}`}
+              onClick={() => setCurrentView("reports")}
+            >
+              <BarChart2 size={18} />
+              <span>Reports</span>
+            </button>
           </nav>
 
           <div className="header-actions">
@@ -98,6 +105,16 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
             >
               <History size={18} />
               <span>History</span>
+            </button>
+            <button
+              className={`mobile-nav-btn ${currentView === "reports" ? "active" : ""}`}
+              onClick={() => {
+                setCurrentView("reports")
+                setMobileMenuOpen(false)
+              }}
+            >
+              <BarChart2 size={18} />
+              <span>Reports</span>
             </button>
           </div>
         )}
