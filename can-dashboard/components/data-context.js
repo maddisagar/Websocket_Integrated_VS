@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useMemo } from "react"
 
 const DataContext = createContext()
 
@@ -57,13 +57,102 @@ const sampleWebSocketData = {
   },
 }
 
+function calculateAlerts(currentData) {
+  if (!currentData.temp616 || !currentData.measurement617 || !currentData.status615) return []
+
+  const newAlerts = []
+  const timestamp = new Date().toLocaleString()
+
+  // Temperature alerts
+  if (currentData.temp616.MtrTemp > 70) {
+    newAlerts.push({
+      id: `motor-temp-${Date.now()}`,
+      type: "critical",
+      category: "Temperature",
+      message: `Motor temperature critical: ${currentData.temp616.MtrTemp.toFixed(1)}°C`,
+      timestamp,
+      value: currentData.temp616.MtrTemp,
+      threshold: 70,
+    })
+  }
+
+  if (currentData.temp616.CtlrTemp1 > 65 || currentData.temp616.CtlrTemp2 > 65) {
+    newAlerts.push({
+      id: `controller-temp-${Date.now()}`,
+      type: "warning",
+      category: "Temperature",
+      message: `Controller temperature high: ${Math.max(currentData.temp616.CtlrTemp1, currentData.temp616.CtlrTemp2).toFixed(1)}°C`,
+      timestamp,
+      value: Math.max(currentData.temp616.CtlrTemp1, currentData.temp616.CtlrTemp2),
+      threshold: 65,
+    })
+  }
+
+  // Voltage alerts
+  if (currentData.measurement617.DcBusVolt > 450 || currentData.measurement617.DcBusVolt < 250) {
+    newAlerts.push({
+      id: `voltage-${Date.now()}`,
+      type: currentData.measurement617.DcBusVolt > 450 ? "critical" : "warning",
+      category: "Electrical",
+      message: `DC Bus voltage ${currentData.measurement617.DcBusVolt > 450 ? "overvoltage" : "undervoltage"}: ${currentData.measurement617.DcBusVolt.toFixed(1)}V`,
+      timestamp,
+      value: currentData.measurement617.DcBusVolt,
+      threshold: currentData.measurement617.DcBusVolt > 450 ? 450 : 250,
+    })
+  }
+
+  // Current alerts
+  if (currentData.measurement617.AcCurrMeaRms > 80) {
+    newAlerts.push({
+      id: `current-${Date.now()}`,
+      type: "warning",
+      category: "Electrical",
+      message: `AC Current high: ${currentData.measurement617.AcCurrMeaRms.toFixed(1)}A`,
+      timestamp,
+      value: currentData.measurement617.AcCurrMeaRms,
+      threshold: 80,
+    })
+  }
+
+  // System status alerts
+  if (currentData.status615.LimpHomeMode) {
+    newAlerts.push({
+      id: `limp-mode-${Date.now()}`,
+      type: "critical",
+      category: "System",
+      message: "Vehicle in Limp Home Mode",
+      timestamp,
+      value: "ACTIVE",
+      threshold: "OFF",
+    })
+  }
+
+  // Sensor health alerts
+  const sensorHealthIssues = Object.entries(currentData.status615)
+    .filter(([key, value]) => key.startsWith("SnsrHealthStatus") && !value)
+    .map(([key]) => key.replace("SnsrHealthStatus", ""))
+
+  if (sensorHealthIssues.length > 0) {
+    newAlerts.push({
+      id: `sensor-health-${Date.now()}`,
+      type: "warning",
+      category: "Sensors",
+      message: `Sensor health issues: ${sensorHealthIssues.join(", ")}`,
+      timestamp,
+      value: sensorHealthIssues.length,
+      threshold: 0,
+    })
+  }
+
+  return newAlerts
+}
+
 export const DataProvider = ({ children }) => {
   const [currentData, setCurrentData] = useState(sampleWebSocketData)
   const [history, setHistory] = useState([sampleWebSocketData])
   const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
-    // Replace the placeholder URL below with your actual ESP32 websocket URL
     const websocketUrl = "ws://your-esp32-websocket-url"
 
     const ws = new WebSocket(websocketUrl)
@@ -95,11 +184,9 @@ export const DataProvider = ({ children }) => {
       console.error("WebSocket error:", error)
     }
 
-    // Add interval to simulate dynamic data update every 1 second if not connected
     const intervalId = setInterval(() => {
       if (!ws || ws.readyState !== WebSocket.OPEN) {
         setCurrentData((prevData) => {
-          // Create new data with slight random variations for testing
           const newData = {
             ...prevData,
             timestamp: new Date().toISOString(),
@@ -123,14 +210,12 @@ export const DataProvider = ({ children }) => {
               ThrotVolt: (prevData.measurement617.ThrotVolt + (Math.random() * 0.2 - 0.1)).toFixed(1),
             },
           }
-          // Convert string values back to numbers
           newData.temp616 = Object.fromEntries(
             Object.entries(newData.temp616).map(([k, v]) => [k, parseFloat(v)])
           )
           newData.measurement617 = Object.fromEntries(
             Object.entries(newData.measurement617).map(([k, v]) => [k, parseFloat(v)])
           )
-          // Update history with new data, keep max 100 entries
           setHistory((prevHistory) => {
             const updated = [...prevHistory, newData]
             return updated.slice(-100)
@@ -146,12 +231,15 @@ export const DataProvider = ({ children }) => {
     }
   }, [])
 
+  const alerts = useMemo(() => calculateAlerts(currentData), [currentData])
+
   return (
     <DataContext.Provider
       value={{
         currentData,
         history,
         isConnected,
+        alerts,
       }}
     >
       {children}

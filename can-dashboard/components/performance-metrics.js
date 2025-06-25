@@ -125,6 +125,13 @@ export default function PerformanceMetrics() {
     return newAlerts.length
   })()
 
+  // Calculate healthy sensor ratio
+  const sensorHealthKeys = Object.keys(currentData.status615).filter((key) =>
+    key.startsWith("SnsrHealthStatus")
+  )
+  const totalSensors = sensorHealthKeys.length
+  const healthySensors = sensorHealthKeys.filter((key) => currentData.status615[key]).length
+
   const calculateTrend = (key, category) => {
     if (history.length < 2) return 0
 
@@ -240,10 +247,14 @@ export default function PerformanceMetrics() {
             <span className="stat-label">Power</span>
             <span className="stat-value">{powerConsumption.toFixed(2)} kW</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">Alerts</span>
-            <span className="stat-value critical">{alertsCount}</span>
-          </div>
+        <div className="stat-item">
+          <span className="stat-label">Alerts</span>
+          <span className="stat-value critical">{alertsCount}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Healthy Sensors</span>
+          <span className="stat-value good">{healthySensors}/{totalSensors} Healthy</span>
+        </div>
         </div>
       </div>
 

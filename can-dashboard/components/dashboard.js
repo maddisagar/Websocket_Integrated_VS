@@ -14,7 +14,7 @@ import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 export default function Dashboard() {
-  const [darkMode, setDarkMode] = useState(true)
+  const [darkMode, setDarkMode] = useState(false)
   const [currentView, setCurrentView] = useState("dashboard") // dashboard, graphs, history
   const [graphMode, setGraphMode] = useState("individual") // individual, overlay, quad
   const { isConnected } = useData()

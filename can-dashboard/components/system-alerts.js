@@ -30,44 +30,17 @@ export default function SystemAlerts() {
       })
     }
 
-    if (currentData.temp616.CtlrTemp1 > 65 || currentData.temp616.CtlrTemp2 > 65) {
-      newAlerts.push({
-        id: `controller-temp-${Date.now()}`,
-        type: "warning",
-        category: "Temperature",
-        message: `Controller temperature high: ${Math.max(currentData.temp616.CtlrTemp1, currentData.temp616.CtlrTemp2).toFixed(1)}°C`,
-        timestamp,
-        icon: Thermometer,
-        value: Math.max(currentData.temp616.CtlrTemp1, currentData.temp616.CtlrTemp2),
-        threshold: 65,
-      })
-    }
-
     // Voltage alerts
-    if (currentData.measurement617.DcBusVolt > 450 || currentData.measurement617.DcBusVolt < 250) {
+    if (currentData.measurement617.DcBusVolt > 450) {
       newAlerts.push({
         id: `voltage-${Date.now()}`,
-        type: currentData.measurement617.DcBusVolt > 450 ? "critical" : "warning",
+        type: "critical",
         category: "Electrical",
-        message: `DC Bus voltage ${currentData.measurement617.DcBusVolt > 450 ? "overvoltage" : "undervoltage"}: ${currentData.measurement617.DcBusVolt.toFixed(1)}V`,
+        message: `DC Bus voltage overvoltage: ${currentData.measurement617.DcBusVolt.toFixed(1)}V`,
         timestamp,
         icon: Zap,
         value: currentData.measurement617.DcBusVolt,
-        threshold: currentData.measurement617.DcBusVolt > 450 ? 450 : 250,
-      })
-    }
-
-    // Current alerts
-    if (currentData.measurement617.AcCurrMeaRms > 80) {
-      newAlerts.push({
-        id: `current-${Date.now()}`,
-        type: "warning",
-        category: "Electrical",
-        message: `AC Current high: ${currentData.measurement617.AcCurrMeaRms.toFixed(1)}A`,
-        timestamp,
-        icon: Activity,
-        value: currentData.measurement617.AcCurrMeaRms,
-        threshold: 80,
+        threshold: 450,
       })
     }
 
@@ -85,24 +58,6 @@ export default function SystemAlerts() {
       })
     }
 
-    // Sensor health alerts
-    const sensorHealthIssues = Object.entries(currentData.status615)
-      .filter(([key, value]) => key.startsWith("SnsrHealthStatus") && !value)
-      .map(([key]) => key.replace("SnsrHealthStatus", ""))
-
-    if (sensorHealthIssues.length > 0) {
-      newAlerts.push({
-        id: `sensor-health-${Date.now()}`,
-        type: "warning",
-        category: "Sensors",
-        message: `Sensor health issues: ${sensorHealthIssues.join(", ")}`,
-        timestamp,
-        icon: XCircle,
-        value: sensorHealthIssues.length,
-        threshold: 0,
-      })
-    }
-
     if (newAlerts.length > 0) {
       setAlerts((prev) => [...newAlerts, ...prev].slice(0, 50)) // Keep last 50 alerts
     }
@@ -113,10 +68,8 @@ export default function SystemAlerts() {
   }
 
   const criticalAlerts = alerts.filter((alert) => alert.type === "critical")
-  const warningAlerts = alerts.filter((alert) => alert.type === "warning")
-  const infoAlerts = alerts.filter((alert) => alert.type === "info")
 
-  const displayedAlerts = showAllAlerts ? alerts : alerts.slice(0, 5)
+  const displayedAlerts = showAllAlerts ? criticalAlerts : criticalAlerts.slice(0, 5)
 
   return (
     <div className="system-alerts">
@@ -126,8 +79,6 @@ export default function SystemAlerts() {
           <h3>System Alerts</h3>
           <div className="alert-counts">
             {criticalAlerts.length > 0 && <span className="alert-badge critical">{criticalAlerts.length}</span>}
-            {warningAlerts.length > 0 && <span className="alert-badge warning">{warningAlerts.length}</span>}
-            {infoAlerts.length > 0 && <span className="alert-badge info">{infoAlerts.length}</span>}
           </div>
         </div>
 
@@ -139,7 +90,7 @@ export default function SystemAlerts() {
             {alertsEnabled ? <Bell size={16} /> : <BellOff size={16} />}
           </button>
 
-          {alerts.length > 0 && (
+          {criticalAlerts.length > 0 && (
             <button className="clear-alerts" onClick={clearAlerts}>
               Clear All
             </button>
@@ -152,16 +103,6 @@ export default function SystemAlerts() {
           <XCircle size={16} />
           <span className="summary-count">{criticalAlerts.length}</span>
           <span className="summary-label">Critical</span>
-        </div>
-        <div className="summary-card warning">
-          <AlertTriangle size={16} />
-          <span className="summary-count">{warningAlerts.length}</span>
-          <span className="summary-label">Warning</span>
-        </div>
-        <div className="summary-card info">
-          <CheckCircle size={16} />
-          <span className="summary-count">{infoAlerts.length}</span>
-          <span className="summary-label">Info</span>
         </div>
       </div>
 
@@ -198,9 +139,9 @@ export default function SystemAlerts() {
             })
           )}
 
-          {alerts.length > 5 && (
+          {criticalAlerts.length > 5 && (
             <button className="show-more-alerts" onClick={() => setShowAllAlerts(!showAllAlerts)}>
-              {showAllAlerts ? `Show Less` : `Show All ${alerts.length} Alerts`}
+              {showAllAlerts ? `Show Less` : `Show All ${criticalAlerts.length} Alerts`}
             </button>
           )}
         </div>

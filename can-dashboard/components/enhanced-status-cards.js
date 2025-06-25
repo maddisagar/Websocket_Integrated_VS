@@ -66,15 +66,15 @@ export default function EnhancedStatusCards() {
   ]
 
   const sensorHealthItems = [
-    { key: "SnsrHealthStatus", label: "General" },
+    { key: "SnsrHealthStatus", label: "Overall Status" },
     { key: "SnsrHealthStatusDcBus", label: "DC Bus" },
-    { key: "SnsrHealthStatus12V", label: "12V Rail" },
-    { key: "SnsrHealthStatus5V", label: "5V Rail" },
+    { key: "SnsrHealthStatus12V", label: "12V Supply" },
+    { key: "SnsrHealthStatus5V", label: "5V Supply" },
     { key: "SnsrHealthStatusPhBCurr", label: "Phase B Current" },
     { key: "SnsrHealthStatusPhCCurr", label: "Phase C Current" },
     { key: "SnsrHealthStatusThrot1", label: "Throttle 1" },
     { key: "SnsrHealthStatusThrot2", label: "Throttle 2" },
-    { key: "SnsrHealthStatusQep", label: "QEP Encoder" },
+    { key: "SnsrHealthStatusQep", label: "Encoder" },
     { key: "SnsrHealthStatusCtlrTemp1", label: "Controller Temp 1" },
     { key: "SnsrHealthStatusCtlrTemp2", label: "Controller Temp 2" },
     { key: "SnsrHealthStatusMtrTemp", label: "Motor Temp" },
