@@ -3,6 +3,7 @@ import { useData } from "./data-context"
 import Header from "./header"
 import GraphContainer from "./graph-container"
 import HistoryView from "./history-view"
+import ReportsSection from "./reports-section"
 import { Activity, BarChart3, Grid3X3 } from "lucide-react"
 import SystemAlerts from "./system-alerts"
 import PerformanceMetrics from "./performance-metrics"
@@ -15,7 +16,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 export default function Dashboard() {
   const [darkMode, setDarkMode] = useState(false)
-  const [currentView, setCurrentView] = useState("dashboard") // dashboard, graphs, history
+  const [currentView, setCurrentView] = useState("dashboard") // dashboard, graphs, history, reports
   const [graphMode, setGraphMode] = useState("individual") // individual, overlay, quad
   const { isConnected } = useData()
 
@@ -85,6 +86,8 @@ export default function Dashboard() {
         {currentView === "graphs" && <GraphContainer mode="individual" fullView={true} />}
 
         {currentView === "history" && <HistoryView />}
+
+        {currentView === "reports" && <ReportsSection />}
       </main>
     </div>
   )

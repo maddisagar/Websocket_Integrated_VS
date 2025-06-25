@@ -1,0 +1,17 @@
+<Activity size={20} />
+            <div>
+              <div className="mode-label">Hill</div>
+              <div className="mode-sub-label">Hold</div>
+            </div>
+          </div>
+=======
+          <div className="mode-item yellow">
+            <Activity size={20} />
+            <div>
+              <div className="mode-label">Hill</div>
+              <div className="mode-sub-label">Hold</div>
+              <div className="mode-value">
+                <AnimatedCounter value={reportData.systemModesCounts.hillHold} />
+              </div>
+            </div>
+          </div>

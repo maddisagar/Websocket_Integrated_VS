@@ -1,36 +1,16 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useData } from "./data-context"
-import { ChevronDown, AlertCircle, Thermometer, BarChart2, TrendingUp, Activity, AlertTriangle } from "lucide-react"
-import Chart from "./chart"
-
-function AnimatedCounter({ value, className }) {
-  const [displayValue, setDisplayValue] = useState(0)
-
-  useMemo(() => {
-    let start = 0
-    const end = value
-    if (start === end) return
-
-    const duration = 1000
-    const increment = end / (duration / 16)
-    let current = start
-
-    const step = () => {
-      current += increment
-      if (current >= end) {
-        setDisplayValue(end)
-      } else {
-        setDisplayValue(Math.floor(current))
-        requestAnimationFrame(step)
-      }
-    }
-    requestAnimationFrame(step)
-  }, [value])
-
-  return <span className={className}>{displayValue}</span>
-}
+import {
+  AlertCircle,
+  BarChart2,
+  AlertTriangle,
+  Thermometer,
+  TrendingUp,
+  Activity,
+  ChevronDown,
+} from "lucide-react"
 
 function CircularProgress({ percentage }) {
   const radius = 40
@@ -40,7 +20,7 @@ function CircularProgress({ percentage }) {
   const strokeDashoffset = circumference - (percentage / 100) * circumference
 
   return (
-    <svg height={radius * 2} width={radius * 2}>
+    <svg height={radius * 2} width={radius * 2} className="circular-progress">
       <circle
         stroke="#fcd34d"
         fill="transparent"
@@ -55,7 +35,7 @@ function CircularProgress({ percentage }) {
         fill="transparent"
         strokeWidth={stroke}
         strokeDasharray={circumference + " " + circumference}
-        style={{ strokeDashoffset, transition: "stroke-dashoffset 0.35s" }}
+        style={{ strokeDashoffset }}
         r={normalizedRadius}
         cx={radius}
         cy={radius}
@@ -76,209 +56,148 @@ function CircularProgress({ percentage }) {
   )
 }
 
-
-function MetricCard({ icon, title, value, iconColor, valueClassName, containerClassName }) {
-  return (
-    <div className={`metric-card ${containerClassName || ""}`}>
-      <div className="icon-circle" style={{ backgroundColor: iconColor }}>
-        {icon}
-      </div>
-      <div className="metric-content">
-        <div className="metric-title">{title}</div>
-        <div className={`metric-value ${valueClassName || ""}`}>{value}</div>
-      </div>
-    </div>
-  )
-}
-
 export default function ReportsSection() {
-  const { dailyReports, getReportsByDateRange } = useData()
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10))
-  const [dateRange, setDateRange] = useState({ start: null, end: null })
-  const [reportData, setReportData] = useState(null)
-
-  // Update reportData when selectedDate or dateRange changes
-  useEffect(() => {
-    if (dateRange.start && dateRange.end) {
-      const reports = getReportsByDateRange(dateRange.start, dateRange.end)
-      setReportData(reports)
-    } else if (selectedDate) {
-      setReportData(dailyReports[selectedDate] || null)
-    } else {
-      setReportData(null)
+  const { dailyReports } = useData()
+  // Fix selectedDate to latest available date in dailyReports (24hr completed)
+  const getLatestDate = () => {
+    const dates = Object.keys(dailyReports)
+    if (dates.length === 0) {
+      const today = new Date()
+      const yesterday = new Date(today)
+      yesterday.setDate(today.getDate() - 1)
+      return yesterday.toISOString().slice(0, 10)
     }
-  }, [selectedDate, dateRange, dailyReports, getReportsByDateRange])
-
-  // Handlers for date and range selection
-  const handleDateChange = (e) => {
-    setSelectedDate(e.target.value)
-    setDateRange({ start: null, end: null })
+    return dates.sort().reverse()[0]
   }
+  const selectedDate = getLatestDate()
+  const reportData = dailyReports[selectedDate] || null
+  const [hasError, setHasError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
-  const handleRangeStartChange = (e) => {
-    setDateRange((prev) => ({ ...prev, start: e.target.value }))
-    setSelectedDate(null)
-  }
-
-  const handleRangeEndChange = (e) => {
-    setDateRange((prev) => ({ ...prev, end: e.target.value }))
-    setSelectedDate(null)
-  }
-
-  // Helper to aggregate multiple reports in dateRange for display
-  const aggregateRangeReport = (reports) => {
-    if (!reports) return null
-    const keys = ["criticalAlertsCount", "systemModesCounts", "temperatureStats"]
-    const agg = {
-      criticalAlertsCount: 0,
-      systemModesCounts: {
-        regenMode: 0,
-        ascMode: 0,
-        hillHold: 0,
-        limp: 0,
-        idleShutdown: 0,
-      },
-      temperatureStats: {
-        minMotorTemp: null,
-        maxMotorTemp: null,
-        minControllerTemp: null,
-        maxControllerTemp: null,
-      },
-    }
-
-    Object.values(reports).forEach((report) => {
-      agg.criticalAlertsCount += report.criticalAlertsCount || 0
-      Object.entries(report.systemModesCounts || {}).forEach(([key, val]) => {
-        agg.systemModesCounts[key] += val || 0
-      })
-      const tempStats = report.temperatureStats || {}
-      agg.temperatureStats.minMotorTemp =
-        agg.temperatureStats.minMotorTemp === null
-          ? tempStats.minMotorTemp
-          : Math.min(agg.temperatureStats.minMotorTemp, tempStats.minMotorTemp)
-      agg.temperatureStats.maxMotorTemp =
-        agg.temperatureStats.maxMotorTemp === null
-          ? tempStats.maxMotorTemp
-          : Math.max(agg.temperatureStats.maxMotorTemp, tempStats.maxMotorTemp)
-      agg.temperatureStats.minControllerTemp =
-        agg.temperatureStats.minControllerTemp === null
-          ? tempStats.minControllerTemp
-          : Math.min(agg.temperatureStats.minControllerTemp, tempStats.minControllerTemp)
-      agg.temperatureStats.maxControllerTemp =
-        agg.temperatureStats.maxControllerTemp === null
-          ? tempStats.maxControllerTemp
-          : Math.max(agg.temperatureStats.maxControllerTemp, tempStats.maxControllerTemp)
-    })
-
-    return agg
-  }
-
-  const displayReport = dateRange.start && dateRange.end ? aggregateRangeReport(reportData) : reportData
-
-  // Prepare data for charts
-  const temperatureChartData = useMemo(() => {
-    if (!displayReport) return null
-    return {
-      labels: ["Min Motor Temp", "Max Motor Temp", "Min Controller Temp", "Max Controller Temp"],
-      datasets: [
-        {
-          label: "Temperature (°C)",
-          data: [
-            displayReport.temperatureStats.minMotorTemp || 0,
-            displayReport.temperatureStats.maxMotorTemp || 0,
-            displayReport.temperatureStats.minControllerTemp || 0,
-            displayReport.temperatureStats.maxControllerTemp || 0,
-          ],
-          backgroundColor: ["#f97316", "#f97316", "#fcd34d", "#fcd34d"],
-        },
-      ],
-    }
-  }, [displayReport])
-
-  const systemModesChartData = useMemo(() => {
-    if (!displayReport) return null
-    return {
-      labels: ["Regen Mode", "ASC Mode", "Hill Hold", "Limp Mode", "Idle Shutdown"],
-      datasets: [
-        {
-          label: "Count",
-          data: [
-            displayReport.systemModesCounts.regenMode,
-            displayReport.systemModesCounts.ascMode,
-            displayReport.systemModesCounts.hillHold,
-            displayReport.systemModesCounts.limp,
-            displayReport.systemModesCounts.idleShutdown,
-          ],
-          backgroundColor: ["#22c55e", "#22c55e", "#22c55e", "#ef4444", "#22c55e"],
-        },
-      ],
-    }
-  }, [displayReport])
-
-  return (
-    <div className="reports-section">
-      <div className="header-row">
+  if (hasError) {
+    return (
+      <div className="reports-section error">
         <h2>Report</h2>
-        <div className="filters">
-          <label>
-            Select Date:{" "}
-            <input type="date" value={selectedDate} onChange={handleDateChange} max={new Date().toISOString().slice(0, 10)} />
-          </label>
-          <label>
-            Or Select Date Range:{" "}
-            <input type="date" value={dateRange.start || ""} onChange={handleRangeStartChange} max={new Date().toISOString().slice(0, 10)} />
-            {" - "}
-            <input type="date" value={dateRange.end || ""} onChange={handleRangeEndChange} max={new Date().toISOString().slice(0, 10)} />
-          </label>
-        </div>
+        <div className="error-message">Error loading report: {errorMessage}</div>
       </div>
+    )
+  }
 
-      {displayReport ? (
-        <div className="report-cards-container">
-          <MetricCard
-            icon={<AlertCircle size={24} color="white" />}
-            title="Critical Alerts"
-            value={<AnimatedCounter value={displayReport.criticalAlertsCount} />}
-          />
-          <MetricCard
-            icon={<BarChart2 size={24} color="#22c55e" />}
-            title="Regen Mode"
-            value={<AnimatedCounter value={displayReport.systemModesCounts.regenMode} />}
-          />
-          <MetricCard
-            icon={<TrendingUp size={24} color="#22c55e" />}
-            title="ASC Mode"
-            value={<AnimatedCounter value={displayReport.systemModesCounts.ascMode} />}
-          />
-          <MetricCard
-            icon={<Activity size={24} color="#22c55e" />}
-            title="Hill Hold Mode"
-            value={<AnimatedCounter value={displayReport.systemModesCounts.hillHold} />}
-          />
-          <MetricCard
-            icon={<AlertTriangle size={24} color="#ef4444" />}
-            title="Limp Mode"
-            value={<AnimatedCounter value={displayReport.systemModesCounts.limp} />}
-          />
-          <MetricCard
-            icon={<ChevronDown size={24} color="#22c55e" />}
-            title="Idle Shutdown"
-            value={<AnimatedCounter value={displayReport.systemModesCounts.idleShutdown} />}
-          />
-          <div className="temperature-charts">
-            <div className="chart-card">
-              <h3>Temperature Stats (°C)</h3>
-              <Chart type="bar" data={temperatureChartData} />
+  try {
+    if (!reportData) {
+      return (
+        <div className="reports-section">
+          <div className="header-row">
+            <h2>Report</h2>
+            {/* Date selector removed to keep static */}
+          </div>
+          <div className="no-report">No report data available for the selected date.</div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="reports-section">
+        <div className="header-row">
+          <h2>Report</h2>
+          {/* Date selector removed to keep static */}
+        </div>
+
+        <div className="top-card">
+          <div className="critical-alerts">
+            <div className="icon-circle red-bg">
+              <AlertCircle size={24} color="white" />
             </div>
-            <div className="chart-card">
-              <h3>System Modes Counts</h3>
-              <Chart type="bar" data={systemModesChartData} />
+            <div className="critical-text">
+              <div className="title">Critical</div>
+              <div className="title">Alerts</div>
+              <div className="value">45</div>
+            </div>
+          </div>
+
+          <div className="system-modes">
+            <div className="mode-item green">
+              <BarChart2 size={20} />
+              <div>
+                <div className="mode-label">Regen</div>
+                <div className="mode-sub-label">Mode</div>
+                <div className="mode-value">48</div>
+              </div>
+            </div>
+            <div className="mode-item green">
+              <TrendingUp size={20} />
+              <div>
+                <div className="mode-label">ASC</div>
+                <div className="mode-sub-label">Mode</div>
+                <div className="mode-value">51</div>
+              </div>
+            </div>
+            <div className="mode-item yellow">
+              <Activity size={20} />
+              <div>
+                <div className="mode-label">Hill</div>
+                <div className="mode-sub-label">Hold</div>
+                <div className="mode-value">49</div>
+              </div>
+            </div>
+            <div className="mode-item red">
+              <AlertTriangle size={20} />
+              <div>
+                <div className="mode-label">Limp</div>
+                <div className="mode-value">45</div>
+              </div>
+            </div>
+            <div className="mode-item green">
+              <ChevronDown size={20} />
+              <div>
+                <div className="mode-value">
+                  <CircularProgress percentage={45} />
+                </div>
+                <div className="mode-label">Idle Shutdown</div>
+              </div>
             </div>
           </div>
         </div>
-      ) : (
-        <div className="no-report">No report data available for the selected date or range.</div>
-      )}
-    </div>
-  )
+
+        <div className="temperature-cards">
+          <div className="temp-card red-bg-light">
+            <div className="temp-icon">
+              <Thermometer size={20} color="#ea580c" />
+            </div>
+            <div className="temp-content">
+              <div className="temp-title">Motor Temperature</div>
+              <div className="temp-values">
+                <div>
+                  Min <strong>58.1°C</strong>
+                </div>
+                <div>
+                  Max <strong>66.7°C</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="temp-card green-bg-light">
+            <div className="temp-icon">
+              <Thermometer size={20} color="#22c55e" />
+            </div>
+            <div className="temp-content">
+              <div className="temp-title">Controller Temperature</div>
+              <div className="temp-values">
+                <div>
+                  Min <strong>44.3°C</strong>
+                </div>
+                <div>
+                  Max <strong>63°C</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  } catch (error) {
+    setHasError(true)
+    setErrorMessage(error.message)
+    return null
+  }
 }
