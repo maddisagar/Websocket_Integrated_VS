@@ -312,8 +312,8 @@ export default function EnhancedStatusCards() {
         }
 
         .status-item.active {
-          background: rgba(34, 197, 94, 0.1);
-          border: 1px solid rgba(34, 197, 94, 0.3);
+          background: rgba(34, 197, 94, 0.2);
+          border: 1px solid rgba(34, 197, 94, 0.8);
         }
 
         .status-item.inactive {
@@ -397,12 +397,12 @@ export default function EnhancedStatusCards() {
         }
 
         .sensor-item.healthy {
-          background: rgba(34, 197, 94, 0.1);
-          border: 1px solid rgba(34, 197, 94, 0.3);
+          background: rgba(34, 197, 94, 0.2);
+          border: 1px solid rgba(34, 197, 94, 0.8);
         }
 
         .sensor-item.unhealthy {
-          background: rgba(239, 68, 68, 0.1);
+          background: rgba(239, 68, 68, 0.2);
           border: 1px solid rgba(239, 68, 68, 0.3);
         }
 

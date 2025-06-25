@@ -30,8 +30,23 @@ export default function HistoryView() {
   ]
 
   const filteredHistory = history.filter((item) => {
-    const matchesSearch = searchTerm === "" || item.timestamp.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesSearch
+    // Filter by search term on timestamp and also on data values (status615, temp616, measurement617)
+    const searchLower = searchTerm.toLowerCase()
+    const matchesSearch =
+      searchTerm === "" ||
+      item.timestamp.toLowerCase().includes(searchLower) ||
+      (item.status615 && Object.values(item.status615).some(val => String(val).toLowerCase().includes(searchLower))) ||
+      (item.temp616 && Object.values(item.temp616).some(val => String(val).toLowerCase().includes(searchLower))) ||
+      (item.measurement617 && Object.values(item.measurement617).some(val => String(val).toLowerCase().includes(searchLower)))
+
+    // Filter by selected category
+    const matchesCategory =
+      selectedCategory === "all" ||
+      (selectedCategory === "status615" && item.status615) ||
+      (selectedCategory === "temp616" && item.temp616) ||
+      (selectedCategory === "measurement617" && item.measurement617)
+
+    return matchesSearch && matchesCategory
   })
 
   const totalPages = Math.ceil(filteredHistory.length / itemsPerPage)
@@ -40,7 +55,7 @@ export default function HistoryView() {
 
   const exportData = () => {
     if (exportFormat === "json") {
-      const dataStr = JSON.stringify(history, null, 2)
+      const dataStr = JSON.stringify(filteredHistory, null, 2)
       const dataBlob = new Blob([dataStr], { type: "application/json" })
       const url = URL.createObjectURL(dataBlob)
       const link = document.createElement("a")
@@ -58,7 +73,7 @@ export default function HistoryView() {
     doc.setFontSize(12)
     doc.text("CAN Data History", 10, 10)
     let y = 20
-    history.forEach((item, index) => {
+    filteredHistory.forEach((item, index) => {
       if (y > 280) {
         doc.addPage()
         y = 10

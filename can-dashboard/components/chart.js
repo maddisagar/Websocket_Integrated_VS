@@ -1,11 +1,15 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react"
 
-export default function Chart({ data, metric, metrics, height = 200, overlay = false, darkMode = true }) {
+const Chart = forwardRef(function Chart({ data, metric, metrics, height = 200, overlay = false, darkMode = true }, ref) {
   const canvasRef = useRef(null)
   const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, content: "" })
   const [isMobile, setIsMobile] = useState(false)
+
+  useImperativeHandle(ref, () => ({
+    canvasRef: canvasRef.current,
+  }))
 
   useEffect(() => {
     setIsMobile(window.innerWidth <= 768)
@@ -242,12 +246,20 @@ export default function Chart({ data, metric, metrics, height = 200, overlay = f
     }
   }
 
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const rect = canvas.getBoundingClientRect()
+    const dpr = window.devicePixelRatio || 1
+    canvas.width = rect.width * dpr
+    canvas.height = rect.height * dpr
+  }, [height])
+
   return (
     <div className="chart-container">
       <canvas
         ref={canvasRef}
-        width={800}
-        height={height}
+        style={{ width: "100%", height: height + "px" }}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setTooltip({ show: false, x: 0, y: 0, content: "" })}
         onTouchStart={handleTouchStart}
@@ -306,4 +318,6 @@ export default function Chart({ data, metric, metrics, height = 200, overlay = f
       `}</style>
     </div>
   )
-}
+})
+
+export default Chart

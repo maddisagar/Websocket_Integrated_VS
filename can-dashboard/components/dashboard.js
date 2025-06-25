@@ -52,8 +52,8 @@ export default function Dashboard() {
       <main className="main-content">
         {currentView === "dashboard" && (
           <>
-            <SystemAlerts />
             <PerformanceMetrics />
+            <SystemAlerts />
             <EnhancedStatusCards />
             <div className="graph-controls">
               <button
