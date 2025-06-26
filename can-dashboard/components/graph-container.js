@@ -51,84 +51,10 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
     })
   }
 
-  // Function to generate and download PDF
-  const downloadPDF = () => {
-    setTimeout(() => {
-      const doc = new jsPDF({
-        orientation: "landscape",
-        unit: "px",
-        format: "a4",
-      })
-
-      let yPosition = 20
-      const pageWidth = doc.internal.pageSize.getWidth()
-      const pageHeight = doc.internal.pageSize.getHeight()
-      const margin = 20
-      const maxWidth = pageWidth - margin * 2
-      const maxHeight = pageHeight - margin * 2
-
-      const addImageToPDF = (imgData, width, height) => {
-        if (yPosition + height > pageHeight - margin) {
-          doc.addPage()
-          yPosition = margin
-        }
-        doc.addImage(imgData, "PNG", margin, yPosition, width, height)
-        yPosition += height + 20
-      }
-
-      if (mode === "individual" || fullView) {
-        individualCanvasRefs.current.forEach((canvas) => {
-          if (canvas) {
-            const imgData = canvas.toDataURL("image/png")
-            const aspectRatio = canvas.width / canvas.height
-            let imgWidth = maxWidth
-            let imgHeight = imgWidth / aspectRatio
-            if (imgHeight > maxHeight) {
-              imgHeight = maxHeight
-              imgWidth = imgHeight * aspectRatio
-            }
-            addImageToPDF(imgData, imgWidth, imgHeight)
-          }
-        })
-      } else if (mode === "overlay") {
-        if (overlayCanvasRef.current) {
-          const canvas = overlayCanvasRef.current
-          if (canvas) {
-            const imgData = canvas.toDataURL("image/png")
-            const aspectRatio = canvas.width / canvas.height
-            let imgWidth = maxWidth
-            let imgHeight = imgWidth / aspectRatio
-            if (imgHeight > maxHeight) {
-              imgHeight = maxHeight
-              imgWidth = imgHeight * aspectRatio
-            }
-            addImageToPDF(imgData, imgWidth, imgHeight)
-          }
-        }
-      } else if (mode === "quad") {
-        quadCanvasRefs.current.forEach((canvas) => {
-          if (canvas) {
-            const imgData = canvas.toDataURL("image/png")
-            const aspectRatio = canvas.width / canvas.height
-            let imgWidth = maxWidth
-            let imgHeight = imgWidth / aspectRatio
-            if (imgHeight > maxHeight) {
-              imgHeight = maxHeight
-              imgWidth = imgHeight * aspectRatio
-            }
-            addImageToPDF(imgData, imgWidth, imgHeight)
-          }
-        })
-      }
-
-      doc.save("graphs.pdf")
-    }, 100)
-  }
 
   if (mode === "individual" || fullView) {
     return (
       <div className="graph-container">
-        <button className="download-pdf-btn" onClick={downloadPDF}>Download PDF</button>
         <div className={`graphs-grid ${fullView ? "full-view" : ""}`}>
           {allMetrics.map((metric, index) => (
             <div key={metric.key} className="graph-card">
@@ -150,19 +76,9 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
           }
 
           .download-pdf-btn {
-            background-color: #22c55e;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            transition: background-color 0.3s ease;
           }
 
           .download-pdf-btn:hover {
-            background-color: #16a34a;
           }
 
           .graphs-grid {
@@ -219,7 +135,6 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
   if (mode === "overlay") {
     return (
       <div className="overlay-container">
-        <button className="download-pdf-btn" onClick={downloadPDF}>Download PDF</button>
         <div className="metric-selector">
           <h4>Select metrics to overlay:</h4>
           <div className="metric-buttons">
@@ -347,7 +262,6 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
   if (mode === "quad") {
     return (
       <div className="quad-container">
-        <button className="download-pdf-btn" onClick={downloadPDF}>Download PDF</button>
         <div className="quad-selectors">
           {[0, 1, 2, 3].map((index) => (
             <div key={index} className="quad-selector">
