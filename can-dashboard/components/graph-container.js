@@ -167,12 +167,12 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
 
           .graphs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
           }
 
           .graphs-grid.full-view {
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 2rem;
           }
 
@@ -198,6 +198,17 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
             
             .graph-card {
               padding: 1rem;
+            }
+          }
+
+          @media (max-width: 480px) {
+            .graphs-grid {
+              grid-template-columns: 1fr;
+              gap: 1rem;
+            }
+
+            .graph-card {
+              padding: 0.75rem;
             }
           }
         `}</style>
@@ -317,6 +328,17 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
               font-size: 0.8rem;
             }
           }
+
+          @media (max-width: 480px) {
+            .metric-buttons {
+              gap: 0.15rem;
+            }
+
+            .metric-btn {
+              padding: 0.3rem 0.6rem;
+              font-size: 0.75rem;
+            }
+          }
         `}</style>
       </div>
     )
@@ -429,6 +451,12 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
             
             .quad-selectors {
               grid-template-columns: repeat(2, 1fr);
+            }
+          }
+
+          @media (max-width: 480px) {
+            .quad-selectors {
+              grid-template-columns: 1fr;
             }
           }
         `}</style>

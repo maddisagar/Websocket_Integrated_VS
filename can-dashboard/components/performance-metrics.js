@@ -4,126 +4,13 @@ import { useData } from "./data-context"
 import { TrendingUp, TrendingDown, Minus, Gauge, Thermometer, Zap, Activity } from "lucide-react"
 
 export default function PerformanceMetrics() {
-  const { currentData, history } = useData()
+  const { currentData, history, alerts } = useData()
 
   if (!currentData.measurement617 || !currentData.temp616) return null
 
-  // Calculate alerts count similar to system-alerts.js logic
-  const alertsCount = (() => {
-    if (!currentData.temp616 || !currentData.measurement617 || !currentData.status615) return 0
-
-    let newAlerts = []
-
-    const timestamp = new Date().toLocaleString()
-
-    // Temperature alerts
-    if (currentData.temp616.MtrTemp > 70) {
-      newAlerts.push({
-        id: `motor-temp-${Date.now()}`,
-        type: "critical",
-        category: "Temperature",
-        message: `Motor temperature critical: ${currentData.temp616.MtrTemp.toFixed(1)}°C`,
-        timestamp,
-        value: currentData.temp616.MtrTemp,
-        threshold: 70,
-      })
-    }
-
-    if (currentData.temp616.CtlrTemp1 > 65) {
-      newAlerts.push({
-        id: `controller-temp1-${Date.now()}`,
-        type: "warning",
-        category: "Temperature",
-        message: `Controller temperature high: ${currentData.temp616.CtlrTemp1.toFixed(1)}°C`,
-        timestamp,
-        value: currentData.temp616.CtlrTemp1,
-        threshold: 65,
-      })
-    }
-
-    if (currentData.temp616.CtlrTemp2 > 65) {
-      newAlerts.push({
-        id: `controller-temp2-${Date.now()}`,
-        type: "warning",
-        category: "Temperature",
-        message: `Controller temperature high: ${currentData.temp616.CtlrTemp2.toFixed(1)}°C`,
-        timestamp,
-        value: currentData.temp616.CtlrTemp2,
-        threshold: 65,
-      })
-    }
-
-    // Voltage alerts
-    if (currentData.measurement617.DcBusVolt > 450 || currentData.measurement617.DcBusVolt < 250) {
-      if (currentData.measurement617.DcBusVolt > 450) {
-        newAlerts.push({
-          id: `voltage-${Date.now()}`,
-          type: "critical",
-          category: "Electrical",
-          message: `DC Bus voltage overvoltage: ${currentData.measurement617.DcBusVolt.toFixed(1)}V`,
-          timestamp,
-          value: currentData.measurement617.DcBusVolt,
-          threshold: 450,
-        })
-      } else {
-        newAlerts.push({
-          id: `voltage-${Date.now()}`,
-          type: "warning",
-          category: "Electrical",
-          message: `DC Bus voltage undervoltage: ${currentData.measurement617.DcBusVolt.toFixed(1)}V`,
-          timestamp,
-          value: currentData.measurement617.DcBusVolt,
-          threshold: 250,
-        })
-      }
-    }
-
-    // Current alerts
-    if (currentData.measurement617.AcCurrMeaRms > 80) {
-      newAlerts.push({
-        id: `current-${Date.now()}`,
-        type: "warning",
-        category: "Electrical",
-        message: `AC Current high: ${currentData.measurement617.AcCurrMeaRms.toFixed(1)}A`,
-        timestamp,
-        value: currentData.measurement617.AcCurrMeaRms,
-        threshold: 80,
-      })
-    }
-
-    // System status alerts
-    if (currentData.status615.LimpHomeMode) {
-      newAlerts.push({
-        id: `limp-mode-${Date.now()}`,
-        type: "critical",
-        category: "System",
-        message: "Vehicle in Limp Home Mode",
-        timestamp,
-        value: "ACTIVE",
-        threshold: "OFF",
-      })
-    }
-
-    // Sensor health alerts
-    const sensorHealthIssues = Object.entries(currentData.status615)
-      .filter(([key, value]) => key.startsWith("SnsrHealthStatus") && !value)
-      .map(([key]) => key.replace("SnsrHealthStatus", ""))
-
-    if (sensorHealthIssues.length > 0) {
-      newAlerts.push({
-        id: `sensor-health-${Date.now()}`,
-        type: "warning",
-        category: "Sensors",
-        message: `Sensor health issues: ${sensorHealthIssues.join(", ")}`,
-        timestamp,
-        value: sensorHealthIssues.length,
-        threshold: 0,
-      })
-    }
-
-    // Count all alerts
-    return newAlerts.length
-  })()
+  const criticalCount = alerts.filter((alert) => alert.type === "critical").length
+  const warningCount = alerts.filter((alert) => alert.type === "warning").length
+  const infoCount = alerts.filter((alert) => alert.type === "info").length
 
   // Calculate healthy sensor ratio
   const sensorHealthKeys = Object.keys(currentData.status615).filter((key) =>
@@ -247,14 +134,34 @@ export default function PerformanceMetrics() {
             <span className="stat-label">Power</span>
             <span className="stat-value">{powerConsumption.toFixed(2)} kW</span>
           </div>
-        <div className="stat-item">
-          <span className="stat-label">Alerts</span>
-          <span className="stat-value critical">{alertsCount}</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-label">Healthy Sensors</span>
-          <span className="stat-value good">{healthySensors}/{totalSensors} Healthy</span>
-        </div>
+          <div className="stat-item">
+            <span className="stat-label">Critical</span>
+            {criticalCount > 0 ? (
+              <span className="stat-value critical">{criticalCount}</span>
+            ) : (
+              <span className="stat-value">0</span>
+            )}
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Warning</span>
+            {warningCount > 0 ? (
+              <span className="stat-value warning">{warningCount}</span>
+            ) : (
+              <span className="stat-value">0</span>
+            )}
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Info</span>
+            {infoCount > 0 ? (
+              <span className="stat-value info">{infoCount}</span>
+            ) : (
+              <span className="stat-value">0</span>
+            )}
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Healthy Sensors</span>
+            <span className="stat-value good">{healthySensors}/{totalSensors} Healthy</span>
+          </div>
         </div>
       </div>
 
@@ -285,13 +192,13 @@ export default function PerformanceMetrics() {
                 </div>
 
                 <div className="metric-bar">
-                  <div
-                    className="metric-fill"
-                    style={{
-                      width: `${Math.min(percentage, 100)}%`,
-                      backgroundColor: metric.color,
-                    }}
-                  ></div>
+                <div
+                  className="metric-fill"
+                  style={{
+                    width: `${Math.min(percentage, 100)}%`,
+                    backgroundColor: metric.color,
+                  }}
+                ></div>
                 </div>
 
                 <div className="metric-range">

@@ -4,11 +4,13 @@ import { useState, useEffect } from "react"
 import { useData } from "./data-context"
 import { Download, Search } from "lucide-react"
 import jsPDF from "jspdf"
+import { calculateAlerts } from "./data-context"
 
 export default function HistoryView() {
   const { history } = useData()
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
+  // Remove category filter since only error alerts are shown
+  // const [selectedCategory, setSelectedCategory] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
   const [exportFormat, setExportFormat] = useState("json") // new state for export format
   const [now, setNow] = useState(Date.now()) // state to trigger re-render for dynamic time update
@@ -22,31 +24,30 @@ export default function HistoryView() {
     return () => clearInterval(interval)
   }, [])
 
-  const categories = [
-    { value: "all", label: "All Data" },
-    { value: "status615", label: "Status (0x615)" },
-    { value: "temp616", label: "Temperature (0x616)" },
-    { value: "measurement617", label: "Measurements (0x617)" },
-  ]
+  // Remove categories array since category filter is removed
+  // const categories = [
+  //   { value: "all", label: "All Data" },
+  //   { value: "status615", label: "Status (0x615)" },
+  //   { value: "temp616", label: "Temperature (0x616)" },
+  //   { value: "measurement617", label: "Measurements (0x617)" },
+  // ]
 
-  const filteredHistory = history.filter((item) => {
-    // Filter by search term on timestamp and also on data values (status615, temp616, measurement617)
+  // First filter items that have critical or warning alerts
+  const filteredByAlerts = history.filter((item) => {
+    const alerts = calculateAlerts(item)
+    return alerts.some(alert => alert.type === "critical" || alert.type === "warning")
+  })
+
+  // Then filter by search term on the reduced set
+  const filteredHistory = filteredByAlerts.filter((item) => {
     const searchLower = searchTerm.toLowerCase()
-    const matchesSearch =
+    return (
       searchTerm === "" ||
       item.timestamp.toLowerCase().includes(searchLower) ||
       (item.status615 && Object.values(item.status615).some(val => String(val).toLowerCase().includes(searchLower))) ||
       (item.temp616 && Object.values(item.temp616).some(val => String(val).toLowerCase().includes(searchLower))) ||
       (item.measurement617 && Object.values(item.measurement617).some(val => String(val).toLowerCase().includes(searchLower)))
-
-    // Filter by selected category
-    const matchesCategory =
-      selectedCategory === "all" ||
-      (selectedCategory === "status615" && item.status615) ||
-      (selectedCategory === "temp616" && item.temp616) ||
-      (selectedCategory === "measurement617" && item.measurement617)
-
-    return matchesSearch && matchesCategory
+    )
   })
 
   const totalPages = Math.ceil(filteredHistory.length / itemsPerPage)
@@ -110,7 +111,8 @@ export default function HistoryView() {
   }
 
   const renderDataSection = (data, title, category) => {
-    if (selectedCategory !== "all" && selectedCategory !== category) return null
+    // Remove category filter check since category filter is removed
+    // if (selectedCategory !== "all" && selectedCategory !== category) return null
     if (!data) return null
 
     return (
@@ -151,7 +153,8 @@ export default function HistoryView() {
             />
           </div>
 
-          <select
+          {/* Remove category filter dropdown since only error alerts are shown */}
+          {/* <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="category-filter"
@@ -161,7 +164,7 @@ export default function HistoryView() {
                 {cat.label}
               </option>
             ))}
-          </select>
+          </select> */}
 
           <select
             value={exportFormat}
@@ -182,12 +185,8 @@ export default function HistoryView() {
 
       <div className="history-stats">
         <div className="stat-card">
-          <span className="stat-value">{history.length}</span>
-          <span className="stat-label">Total Records</span>
-        </div>
-        <div className="stat-card">
           <span className="stat-value">{filteredHistory.length}</span>
-          <span className="stat-label">Filtered Results</span>
+          <span className="stat-label">Total Critical/Warning Alerts</span>
         </div>
         <div className="stat-card">
           <span className="stat-value">{totalPages}</span>
@@ -204,9 +203,19 @@ export default function HistoryView() {
             </div>
 
             <div className="item-content">
-              {renderDataSection(item.status615, "Status (0x615)", "status615")}
-              {renderDataSection(item.temp616, "Temperature (0x616)", "temp616")}
-              {renderDataSection(item.measurement617, "Measurements (0x617)", "measurement617")}
+              {(() => {
+                const alerts = calculateAlerts(item).filter(alert => alert.type === "critical" || alert.type === "warning")
+                if (alerts.length === 0) return null
+                return (
+                  <div className="alerts-list">
+                    {alerts.map(alert => (
+                      <div key={alert.id} className={`alert-item alert-${alert.type}`}>
+                        <strong>{alert.category}:</strong> {alert.message}
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
             </div>
           </div>
         ))}

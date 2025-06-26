@@ -43,6 +43,27 @@
   padding: 1rem;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: #1e293b;
+  box-sizing: border-box;
+}
+
+.reports-section *,
+.reports-section *::before,
+.reports-section *::after {
+  box-sizing: inherit;
+}
+
+.reports-section .temp-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .reports-section .top-card {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
 }
 
 .reports-section .header-row {
@@ -259,6 +280,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 input[type="date"] {
   scrollbar-width: none;
   -moz-appearance: textfield;
+}
+
+/* Download PDF button styles */
+.download-button {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #22c55e;
+  border: none;
+  border-radius: 0.5rem;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.download-button:hover {
+  background-color: #16a34a;
 }
 
 /* Reports Section Styles */
@@ -665,4 +704,139 @@ input[type="date"] {
 .app.dark .reports-section .temperature-cards .temp-card.green-bg-light {
   background-color: #dcfce7 !important;
   border-color: #bbf7d0 !important;
+}
+
+/* Responsive global container and layout adjustments */
+@media (max-width: 1200px) {
+  .main-content {
+    padding: 1rem 1.5rem !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .main-content {
+    padding: 1rem 1rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0.5rem 1rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .main-content {
+    padding: 0.5rem 0.75rem !important;
+  }
+}
+
+/* Utility responsive helpers */
+.flex-column-mobile {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .flex-column-mobile {
+    flex-direction: column;
+  }
+}
+
+/* Ensure images and SVGs scale properly */
+img, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* Scrollbar adjustments for smaller devices */
+@media (max-width: 480px) {
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* Responsive styles for reports section */
+@media (max-width: 768px) {
+  .reports-section .top-card,
+  .reports-section .system-modes,
+  .reports-section .temperature-cards {
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .reports-section .critical-alerts,
+  .reports-section .system-modes .mode-item,
+  .reports-section .temp-card {
+    min-width: auto;
+    width: 100%;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 0.75rem;
+  }
+
+  .reports-section .system-modes {
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .reports-section .system-modes .mode-item {
+    flex: 1 1 45%;
+  }
+
+  .reports-section .temperature-cards {
+    gap: 0.75rem;
+  }
+
+  .reports-section .temp-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .reports-section .temp-icon {
+    margin-bottom: 0.5rem;
+  }
+
+  .reports-section .temp-title {
+    font-size: 1.25rem;
+  }
+
+  .reports-section .temp-values {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .reports-section .header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .reports-section .header-row h2 {
+    font-size: 1.25rem;
+  }
+
+  .reports-section .date-picker {
+    width: 100%;
+  }
 }

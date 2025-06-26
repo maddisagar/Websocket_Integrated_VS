@@ -212,6 +212,7 @@ const Chart = forwardRef(function Chart({ data, metric, metrics, height = 200, o
 
     const canvas = canvasRef.current
     const rect = canvas.getBoundingClientRect()
+    const containerRect = canvas.parentElement.getBoundingClientRect()
     const touch = e.touches[0]
     const x = touch.clientX - rect.left
 
@@ -232,10 +233,19 @@ const Chart = forwardRef(function Chart({ data, metric, metrics, height = 200, o
           })
           .join("\n")
 
+        // Calculate tooltip position relative to container and clamp within viewport
+        let tooltipX = touch.clientX - containerRect.left
+        let tooltipY = touch.clientY - containerRect.top - 10
+
+        // Clamp tooltipX within container width
+        tooltipX = Math.min(Math.max(tooltipX, 0), containerRect.width)
+        // Clamp tooltipY within container height
+        tooltipY = Math.min(Math.max(tooltipY, 0), containerRect.height)
+
         setTooltip({
           show: true,
-          x: touch.clientX,
-          y: touch.clientY - 100,
+          x: tooltipX,
+          y: tooltipY,
           content,
         })
 

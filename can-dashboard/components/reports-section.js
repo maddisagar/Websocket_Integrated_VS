@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useData } from "./data-context"
+import { useState, useRef } from "react"
 import "../src/app/date-picker.css"
 import {
   AlertCircle,
@@ -12,7 +11,10 @@ import {
   Activity,
   ChevronDown,
 } from "lucide-react"
-import AnimatedCounter from "./animated-counter"
+import html2canvas from "html2canvas"
+import jsPDF from "jspdf"
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
 
 function CircularProgress({ percentage }) {
   const radius = 40
@@ -58,23 +60,54 @@ function CircularProgress({ percentage }) {
   )
 }
 
+const constantReportData = {
+  criticalAlertsCount: 5,
+  systemModesCounts: {
+    regenMode: 21,
+    ascMode: 17,
+    hillHold: 13,
+    limp: 4,
+    idleShutdown: 55,
+  },
+  temperatureStats: {
+    minMotorTemp: 36,
+    maxMotorTemp: 78,
+    minControllerTemp: 28,
+    maxControllerTemp: 68,
+  },
+}
+
 export default function ReportsSection() {
-  const { dailyReports } = useData()
-  // Fix selectedDate to latest available date in dailyReports (24hr completed)
-  const getLatestDate = () => {
-    const dates = Object.keys(dailyReports)
-    if (dates.length === 0) {
-      const today = new Date()
-      const yesterday = new Date(today)
-      yesterday.setDate(today.getDate() - 1)
-      return yesterday.toISOString().slice(0, 10)
-    }
-    return dates.sort().reverse()[0]
-  }
-  const [selectedDate, setSelectedDate] = useState(getLatestDate())
-  const reportData = dailyReports[selectedDate] || null
+  const reportRef = useRef(null)
+
+  const [selectedDate, setSelectedDate] = useState(new Date())
+
+  const reportData = constantReportData
   const [hasError, setHasError] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+
+  const handleDownloadPDF = async () => {
+    if (!reportRef.current) return
+    const pdf = new jsPDF("p", "mm", "a4")
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const padding = 10
+    const headerHeight = 10
+
+    const element = reportRef.current
+    const canvas = await html2canvas(element, { scale: 2 })
+    const imgData = canvas.toDataURL("image/png")
+    const imgWidth = pdfWidth - padding * 2
+    const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+    // Add date text at the top
+    pdf.setFontSize(12)
+    pdf.text(`Report Date: ${selectedDate.toISOString().slice(0, 10)}`, padding, padding + 7)
+
+    // Add image below the date text
+    pdf.addImage(imgData, "PNG", padding, padding + headerHeight, imgWidth, imgHeight)
+
+    pdf.save(`report-${selectedDate.toISOString().slice(0, 10)}.pdf`)
+  }
 
   if (hasError) {
     return (
@@ -85,40 +118,25 @@ export default function ReportsSection() {
     )
   }
 
-  try {
-    if (!reportData) {
-      return (
-        <div className="reports-section">
-          <div className="header-row">
-            <h2>Report</h2>
-            <input
-              type="date"
-              value={selectedDate}
-              max={getLatestDate()}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="date-picker"
-              aria-label="Select report date"
-            />
-          </div>
-          <div className="no-report">No report data available for the selected date.</div>
-        </div>
-      )
-    }
+  return (
+    <div className="reports-section">
+      <div className="header-row">
+        <h2>Report</h2>
+        <DatePicker
+          selected={selectedDate}
+          onChange={(date) => setSelectedDate(date)}
+          maxDate={new Date()}
+          dateFormat="yyyy-MM-dd"
+          className="date-picker"
+          aria-label="Select report date"
+          showPopperArrow={false}
+        />
+        <button onClick={handleDownloadPDF} className="download-button" aria-label="Download report as PDF">
+          Download PDF
+        </button>
+      </div>
 
-    return (
-      <div className="reports-section">
-          <div className="header-row">
-            <h2>Report</h2>
-            <input
-              type="date"
-              value={selectedDate}
-              max={getLatestDate()}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="date-picker"
-              aria-label="Select report date"
-            />
-          </div>
-
+      <div ref={reportRef}>
         <div className="top-card">
           <div className="critical-alerts">
             <div className="icon-circle red-bg">
@@ -127,7 +145,7 @@ export default function ReportsSection() {
             <div className="critical-text">
               <div className="title">Critical</div>
               <div className="title">Alerts</div>
-              <div className="value">45</div>
+              <div className="value">{reportData.criticalAlertsCount}</div>
             </div>
           </div>
 
@@ -137,7 +155,7 @@ export default function ReportsSection() {
               <div>
                 <div className="mode-label">Regen</div>
                 <div className="mode-sub-label">Mode</div>
-                <div className="mode-value">48</div>
+                <div className="mode-value">{reportData.systemModesCounts.regenMode}</div>
               </div>
             </div>
             <div className="mode-item green">
@@ -145,7 +163,7 @@ export default function ReportsSection() {
               <div>
                 <div className="mode-label">ASC</div>
                 <div className="mode-sub-label">Mode</div>
-                <div className="mode-value">51</div>
+                <div className="mode-value">{reportData.systemModesCounts.ascMode}</div>
               </div>
             </div>
             <div className="mode-item yellow">
@@ -153,23 +171,21 @@ export default function ReportsSection() {
               <div>
                 <div className="mode-label">Hill</div>
                 <div className="mode-sub-label">Hold</div>
-                <div className="mode-value">
-                  <AnimatedCounter value={reportData.systemModesCounts.hillHold} />
-                </div>
+                <div className="mode-value">{reportData.systemModesCounts.hillHold}</div>
               </div>
             </div>
             <div className="mode-item red">
               <AlertTriangle size={20} />
               <div>
                 <div className="mode-label">Limp</div>
-                <div className="mode-value">45</div>
+                <div className="mode-value">{reportData.systemModesCounts.limp}</div>
               </div>
             </div>
             <div className="mode-item green">
               <ChevronDown size={20} />
               <div>
                 <div className="mode-value">
-                  <CircularProgress percentage={45} />
+                  <CircularProgress percentage={reportData.systemModesCounts.idleShutdown} />
                 </div>
                 <div className="mode-label">Idle Shutdown</div>
               </div>
@@ -186,10 +202,10 @@ export default function ReportsSection() {
               <div className="temp-title">Motor Temperature</div>
               <div className="temp-values">
                 <div>
-                  Min <strong>58.1°C</strong>
+                  Min <strong>{reportData.temperatureStats.minMotorTemp}°C</strong>
                 </div>
                 <div>
-                  Max <strong>66.7°C</strong>
+                  Max <strong>{reportData.temperatureStats.maxMotorTemp}°C</strong>
                 </div>
               </div>
             </div>
@@ -202,20 +218,16 @@ export default function ReportsSection() {
               <div className="temp-title">Controller Temperature</div>
               <div className="temp-values">
                 <div>
-                  Min <strong>44.3°C</strong>
+                  Min <strong>{reportData.temperatureStats.minControllerTemp}°C</strong>
                 </div>
                 <div>
-                  Max <strong>63°C</strong>
+                  Max <strong>{reportData.temperatureStats.maxControllerTemp}°C</strong>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    )
-  } catch (error) {
-    setHasError(true)
-    setErrorMessage(error.message)
-    return null
-  }
+    </div>
+  )
 }

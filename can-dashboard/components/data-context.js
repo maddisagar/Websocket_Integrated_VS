@@ -57,7 +57,7 @@ const sampleWebSocketData = {
   },
 }
 
-function calculateAlerts(currentData) {
+export function calculateAlerts(currentData) {
   if (!currentData.temp616 || !currentData.measurement617 || !currentData.status615) return []
 
   const newAlerts = []
@@ -154,7 +154,38 @@ export const DataProvider = ({ children }) => {
     // Load from localStorage if available
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("dailyReports")
-      return stored ? JSON.parse(stored) : {}
+      if (stored) {
+        return JSON.parse(stored)
+      } else {
+        // Generate sample data from 2026-06-20 to today
+        const startDate = new Date("2026-06-20")
+        const today = new Date()
+        const reports = {}
+        for (
+          let d = new Date(startDate);
+          d <= today;
+          d.setDate(d.getDate() + 1)
+        ) {
+          const dateStr = d.toISOString().slice(0, 10)
+          reports[dateStr] = {
+            criticalAlertsCount: Math.floor(Math.random() * 50),
+            systemModesCounts: {
+              regenMode: Math.floor(Math.random() * 100),
+              ascMode: Math.floor(Math.random() * 100),
+              hillHold: Math.floor(Math.random() * 100),
+              limp: Math.floor(Math.random() * 50),
+              idleShutdown: Math.floor(Math.random() * 100),
+            },
+            temperatureStats: {
+              minMotorTemp: (Math.random() * 20 + 40).toFixed(1),
+              maxMotorTemp: (Math.random() * 20 + 60).toFixed(1),
+              minControllerTemp: (Math.random() * 20 + 30).toFixed(1),
+              maxControllerTemp: (Math.random() * 20 + 60).toFixed(1),
+            },
+          }
+        }
+        return reports
+      }
     }
     return {}
   })

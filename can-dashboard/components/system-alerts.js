@@ -130,9 +130,7 @@ export default function SystemAlerts() {
             <h3>System Alerts</h3>
           </div>
           <div className="alert-counts">
-            {criticalCount > 0 && <span className="alert-badge critical">Critical: {criticalCount}</span>}
-            {warningCount > 0 && <span className="alert-badge warning">Warning: {warningCount}</span>}
-            {infoCount > 0 && <span className="alert-badge info">Info: {infoCount}</span>}
+            {/* Removed critical, warning, and info counts from top right side */}
           </div>
         </div>
 
@@ -143,18 +141,19 @@ export default function SystemAlerts() {
               <span>All systems operating normally</span>
             </div>
           ) : (
-        <div className="alerts-columns-row" style={{ display: "flex", gap: "1rem", paddingBottom: "1rem" }}>
+        <div className="alerts-columns-row" style={{ display: "flex", gap: "1rem", paddingBottom: "1rem", flexWrap: "wrap" }}>
           <div
             className="alerts-column critical"
             style={{
-              flex: 1,
+              flex: "1 1 300px",
               borderRight: "2px solid rgba(128, 128, 128, 0.7)",
-              paddingLeft: "1.5rem",
-              paddingRight: "1.5rem",
-              minHeight: "300px",
+              paddingLeft: "1rem",
+              paddingRight: "1rem",
+              minHeight: "auto",
               boxSizing: "border-box",
               display: "flex",
               flexDirection: "column",
+              marginBottom: "1rem",
             }}
           >
             <h4 className="column-title">Critical Alerts</h4>
@@ -182,14 +181,15 @@ export default function SystemAlerts() {
           <div
             className="alerts-column warning"
             style={{
-              flex: 1,
+              flex: "1 1 300px",
               borderRight: "2px solid rgba(128, 128, 128, 0.7)",
-              paddingLeft: "1.5rem",
-              paddingRight: "1.5rem",
-              minHeight: "300px",
+              paddingLeft: "1rem",
+              paddingRight: "1rem",
+              minHeight: "auto",
               boxSizing: "border-box",
               display: "flex",
               flexDirection: "column",
+              marginBottom: "1rem",
             }}
           >
             <h4 className="column-title">Warning Alerts</h4>
@@ -217,13 +217,14 @@ export default function SystemAlerts() {
           <div
             className="alerts-column info"
             style={{
-              flex: 1,
-              paddingLeft: "1.5rem",
-              paddingRight: "1.5rem",
-              minHeight: "300px",
+              flex: "1 1 300px",
+              paddingLeft: "1rem",
+              paddingRight: "1rem",
+              minHeight: "auto",
               boxSizing: "border-box",
               display: "flex",
               flexDirection: "column",
+              marginBottom: "1rem",
             }}
           >
             <h4 className="column-title">Info Alerts</h4>

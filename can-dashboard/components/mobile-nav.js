@@ -144,10 +144,13 @@ export default function MobileNav({ currentView, setCurrentView }) {
         }
 
         .mobile-nav-item.active {
-          background: rgba(34, 197, 94, 0.2);
-          color: #22c55e;
+          background: rgb(245, 249, 246);
+          color: #4ade80; /* lighter green */
         }
 
+        .mobile-nav-item svg {
+          stroke: currentColor;
+        }
         @media (max-width: 768px) {
           .mobile-nav-toggle {
             display: flex;

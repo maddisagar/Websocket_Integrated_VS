@@ -270,15 +270,15 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
         .theme-toggle:hover, .mobile-menu-btn:hover {
           background: rgba(34, 197, 94, 0.2);
           transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+          box-shadow: 0 8px 25px rgba(172, 197, 182, 0.3);
         }
 
         .mobile-nav {
           display: none;
           flex-direction: column;
           padding: 1rem;
-          border-top: 1px solid rgba(34, 197, 94, 0.2);
-          background: rgba(15, 23, 42, 0.95);
+          border-top: 1px solid rgba(185, 191, 187, 0.2);
+          background: #f5f9f6;
           backdrop-filter: blur(20px);
         }
 
@@ -299,12 +299,16 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
         }
 
         .mobile-nav-btn:hover {
-          background: rgba(34, 197, 94, 0.1);
+          background: rgb(255, 255, 255);
         }
 
         .mobile-nav-btn.active {
-          background: rgba(34, 197, 94, 0.2);
-          color: #22c55e;
+          background: rgb(245, 249, 246);
+          color: #4ade80; /* lighter green */
+        }
+
+        .mobile-nav-btn svg {
+          stroke: currentColor;
         }
 
         @media (max-width: 768px) {
