@@ -36,6 +36,8 @@
   stroke: currentColor;
 }
 
+/* Dark mode styles to be appended from patch file */
+
 /* Reports Section Styles */
 .reports-section {
   padding: 1rem;
@@ -493,28 +495,174 @@ input[type="date"] {
 .control-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  gap: 0.75rem;
+  padding: 1.25rem 2.5rem;
   border: none;
   border-radius: 10px;
   background: transparent;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1.25rem;
   color: inherit;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .control-btn:hover {
-  background: rgba(34, 197, 94, 0.1);
+  background: rgba(34, 197, 94, 0.15);
   transform: translateY(-1px);
 }
 
 .control-btn.active {
-  background: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
+  background: rgba(34, 197, 94, 0.3);
+  color: #16a34a;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
 }
 
 .control-btn svg {
   stroke: currentColor;
+}
+
+/* Dark mode styles */
+.app.dark {
+  background-color: #000000;
+  color: #cbd5e1;
+}
+
+.app.dark .header {
+  border-bottom-color: rgba(34, 197, 94, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #cbd5e1;
+  backdrop-filter: blur(20px);
+}
+
+.app.dark .header .logo {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.6);
+  color: white;
+}
+
+.app.dark .header .title-section h1 {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.app.dark .header .connection-status {
+  opacity: 0.9;
+  color: #a3bffa;
+}
+
+.app.dark .nav-btn {
+  color: #cbd5e1;
+}
+
+.app.dark .nav-btn:hover {
+  background: rgba(34, 197, 94, 0.2);
+  transform: translateY(-1px);
+}
+
+.app.dark .nav-btn.active {
+  background: rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+}
+
+.app.dark .header-actions .theme-toggle {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.app.dark .mobile-menu-btn {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.app.dark .mobile-nav {
+  background: rgba(15, 23, 42, 0.6);
+  border-top-color: rgba(34, 197, 94, 0.5);
+  backdrop-filter: blur(20px);
+}
+
+.app.dark .mobile-nav-btn {
+  color: #cbd5e1;
+}
+
+.app.dark .mobile-nav-btn:hover {
+  background: rgba(34, 197, 94, 0.3);
+}
+
+.app.dark .mobile-nav-btn.active {
+  background: rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+}
+
+.app.dark .main-content {
+  background-color: #000000;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  min-height: 100vh;
+  color: #cbd5e1;
+}
+
+.app.dark .graph-controls {
+  background-color: #000000;
+  border-radius: 12px;
+}
+
+.app.dark .control-btn {
+  color: #cbd5e1;
+}
+
+.app.dark .control-btn:hover {
+  background: rgba(34, 197, 94, 0.3);
+}
+
+.app.dark .control-btn.active {
+  background: rgba(34, 197, 94, 0.5);
+  color: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+}
+
+/* Exclude reports section from dark mode */
+.app.dark .reports-section {
+  background-color: transparent !important;
+  color: #1e293b !important;
+  border-color: transparent !important;
+}
+
+.app.dark .reports-section .top-card {
+  background-color: #fff !important;
+  border-color: #fca5a5 !important;
+}
+
+.app.dark .reports-section .critical-alerts {
+  border-color: #fca5a5 !important;
+}
+
+.app.dark .reports-section .critical-alerts .icon-circle {
+  background-color: #ef4444 !important;
+}
+
+.app.dark .reports-section .critical-text,
+.app.dark .reports-section .system-modes .mode-label,
+.app.dark .reports-section .system-modes .mode-value,
+.app.dark .reports-section .temp-title,
+.app.dark .reports-section .temp-values,
+.app.dark .reports-section .mode-sub-label {
+  color: #1e293b !important;
+}
+
+.app.dark .reports-section .system-modes .mode-item > div {
+  color: #334155 !important;
+}
+
+.app.dark .reports-section .temperature-cards .temp-card.red-bg-light {
+  background-color: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+}
+
+.app.dark .reports-section .temperature-cards .temp-card.green-bg-light {
+  background-color: #dcfce7 !important;
+  border-color: #bbf7d0 !important;
 }
