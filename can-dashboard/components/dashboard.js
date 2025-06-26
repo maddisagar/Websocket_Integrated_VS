@@ -56,6 +56,11 @@ export default function Dashboard() {
             <PerformanceMetrics />
             <SystemAlerts />
             <EnhancedStatusCards />
+          </>
+        )}
+
+        {currentView === "graphs" && (
+          <>
             <div className="graph-controls">
               <button
                 className={`control-btn ${graphMode === "individual" ? "active" : ""}`}
@@ -82,8 +87,6 @@ export default function Dashboard() {
             <GraphContainer mode={graphMode} darkMode={darkMode} />
           </>
         )}
-
-        {currentView === "graphs" && <GraphContainer mode="individual" fullView={true} />}
 
         {currentView === "history" && <HistoryView />}
 

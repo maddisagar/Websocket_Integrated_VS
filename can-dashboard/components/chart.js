@@ -134,7 +134,7 @@ const Chart = forwardRef(function Chart({ data, metric, metrics, height = 200, o
         ctx.font =
           "bold 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
         ctx.fillStyle = currentMetric.color
-        ctx.fillText(currentMetric.label, padding.left, 18)
+        ctx.fillText(currentMetric.label, padding.left, 14)
 
         if (currentMetric.unit) {
           const labelWidth = ctx.measureText(currentMetric.label).width
@@ -142,7 +142,7 @@ const Chart = forwardRef(function Chart({ data, metric, metrics, height = 200, o
           ctx.fillStyle = darkMode ? "rgba(241, 245, 249, 1)" : "#334155" // white for dark mode, dark slate gray for light mode
           ctx.shadowColor = darkMode ? "rgba(0, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.3)" // subtle dark shadow for light mode
           ctx.shadowBlur = 2
-          ctx.fillText(currentMetric.unit, padding.left + labelWidth + 10, 18) // same baseline, small gap
+          ctx.fillText(currentMetric.unit, padding.left + labelWidth + 10, 14) // same baseline, small gap
           ctx.shadowBlur = 0
         }
       }
