@@ -1,188 +1,314 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useData } from "./data-context"
-import { AlertTriangle, CheckCircle, XCircle, Bell, BellOff, Thermometer, Zap, Activity } from "lucide-react"
+import { AlertTriangle, XCircle, Bell, Thermometer, Zap, Activity } from "lucide-react"
+
+const ERROR_LIST = [
+  // DT007_B001_Status (0x615)
+  { code: "EcoBoost", type: "critical", icon: Zap },
+  { code: "LimpHomeMode", type: "critical", icon: AlertTriangle },
+  { code: "Brake", type: "warning", icon: XCircle },
+  { code: "Forward", type: "info", icon: Activity },
+  { code: "Reverse", type: "info", icon: Activity },
+  { code: "Neutral", type: "info", icon: Activity },
+  { code: "HillholdMode", type: "warning", icon: XCircle },
+  { code: "RegenMode", type: "info", icon: Activity },
+  { code: "ThrotMode", type: "warning", icon: XCircle },
+  { code: "AscMode", type: "info", icon: Activity },
+  { code: "SnsrHealthStatus", type: "warning", icon: AlertTriangle },
+  { code: "SnsrHealthStatusDcBus", type: "warning", icon: AlertTriangle },
+  { code: "SnsrHealthStatus12V", type: "warning", icon: AlertTriangle },
+  { code: "SnsrHealthStatus5V", type: "warning", icon: AlertTriangle },
+  { code: "SnsrHealthStatusPhBCurr", type: "warning", icon: AlertTriangle },
+  { code: "SnsrHealthStatusPhCCurr", type: "warning", icon: AlertTriangle },
+  { code: "SnsrHealthStatusThrot1", type: "warning", icon: AlertTriangle },
+  { code: "SnsrHealthStatusQep", type: "warning", icon: AlertTriangle },
+  { code: "SnsrHealthStatusCtlrTemp1", type: "warning", icon: AlertTriangle },
+  { code: "SnsrHealthStatusMtrTemp", type: "warning", icon: AlertTriangle },
+  { code: "SnsrHealthStatusThrot2", type: "warning", icon: AlertTriangle },
+  { code: "SnsrHealthStatusCtlrTemp2", type: "warning", icon: AlertTriangle },
+  { code: "PcModeEnable", type: "info", icon: Activity },
+  { code: "StartStop", type: "info", icon: Activity },
+  { code: "DcuControlModeStatus", type: "info", icon: Activity },
+  { code: "IdleShutdown", type: "info", icon: Activity },
+
+  // DT008_B002 (0x616)
+  { code: "CtlrTemp1", type: "warning", icon: Thermometer },
+  { code: "CtlrTemp2", type: "warning", icon: Thermometer },
+  { code: "CtlrTemp", type: "warning", icon: Thermometer },
+  { code: "MtrTemp", type: "critical", icon: Thermometer },
+
+  // DT009_B003 (0x617)
+  { code: "AcCurrMeaRms", type: "warning", icon: Zap },
+  { code: "DcCurrEstd", type: "warning", icon: Zap },
+  { code: "DcBusVolt", type: "critical", icon: Zap },
+  { code: "MtrSpd", type: "info", icon: Activity },
+  { code: "ThrotVolt", type: "warning", icon: Zap },
+
+  // DTFS001_Type (0x3)
+  { code: "CanErr", type: "critical", icon: AlertTriangle },
+  { code: "DcBusOvErr", type: "critical", icon: AlertTriangle },
+  { code: "DcBusSnrScFlt", type: "critical", icon: AlertTriangle },
+  { code: "DcBusUvErr", type: "critical", icon: AlertTriangle },
+  { code: "MtrTempCutbackLmtErr", type: "critical", icon: AlertTriangle },
+  { code: "CtlrTempCutbackLmtErr", type: "critical", icon: AlertTriangle },
+  { code: "MtrTempCutoffLmtErr", type: "critical", icon: AlertTriangle },
+  { code: "CtlrTempCutoffLmtErr", type: "critical", icon: AlertTriangle },
+  { code: "MtrTempSnsrOcFlt", type: "critical", icon: AlertTriangle },
+  { code: "CtlrTempSnsrOcFlt", type: "critical", icon: AlertTriangle },
+  { code: "MtrTempSnsrScFlt", type: "critical", icon: AlertTriangle },
+  { code: "CtlrTempSnsrScFlt", type: "critical", icon: AlertTriangle },
+  { code: "PhBCurrSnsrOverCurrFlt", type: "critical", icon: AlertTriangle },
+  { code: "PhBCurrSnsrScCurrFlt", type: "critical", icon: AlertTriangle },
+  { code: "DcBusSnsrOcFlt", type: "critical", icon: AlertTriangle },
+  { code: "PhBCurrSnsrOcFlt", type: "critical", icon: AlertTriangle },
+  { code: "PhCCurrSnsrOcFlt", type: "critical", icon: AlertTriangle },
+  { code: "PhCCurrSnsrOverCurrFlt", type: "critical", icon: AlertTriangle },
+  { code: "PhCCurrSnsrScCurrFlt", type: "critical", icon: AlertTriangle },
+  { code: "PhCCurrSnsrScFlt", type: "critical", icon: AlertTriangle },
+  { code: "QepFlt", type: "critical", icon: AlertTriangle },
+  { code: "SocLowLmtErr", type: "critical", icon: AlertTriangle },
+  { code: "ThrotLowLmtErr", type: "critical", icon: AlertTriangle },
+  { code: "ThrotRedunErr", type: "critical", icon: AlertTriangle },
+  { code: "ThrotStuckErr", type: "critical", icon: AlertTriangle },
+  { code: "ThrotUpLmtErr", type: "critical", icon: AlertTriangle },
+  { code: "UnexpectedParkSenseHighErr", type: "critical", icon: AlertTriangle },
+  { code: "UnintendedAccelerationErr", type: "critical", icon: AlertTriangle },
+  { code: "UnintendedDecelerationErr", type: "critical", icon: AlertTriangle },
+  { code: "ThrotSnsrOcFlt", type: "critical", icon: AlertTriangle },
+  { code: "ThrotSnsrScFlt", type: "critical", icon: AlertTriangle },
+  { code: "FnrErr", type: "critical", icon: AlertTriangle },
+  { code: "FnrWarn", type: "warning", icon: AlertTriangle },
+  { code: "Supply12SnsrOcFlt", type: "critical", icon: AlertTriangle },
+  { code: "Supply5SnsrOcFlt", type: "critical", icon: AlertTriangle },
+  { code: "Supply12UvErr", type: "critical", icon: AlertTriangle },
+  { code: "Supply5UvErr", type: "critical", icon: AlertTriangle },
+  { code: "HwOverCurrFlt", type: "critical", icon: AlertTriangle },
+  { code: "Type_0_Err", type: "critical", icon: AlertTriangle },
+  { code: "Type_1_Err", type: "critical", icon: AlertTriangle },
+  { code: "Type_2_Err", type: "critical", icon: AlertTriangle },
+  { code: "Type_3_Err", type: "critical", icon: AlertTriangle },
+  { code: "Type_4_Err", type: "critical", icon: AlertTriangle },
+  { code: "QepFlt_2", type: "critical", icon: AlertTriangle },
+  { code: "PhACurrSnsrOverCurrFlt", type: "critical", icon: AlertTriangle },
+  { code: "PhACurrSnsrScCurrFlt", type: "critical", icon: AlertTriangle },
+  { code: "DcBusLvErr", type: "critical", icon: AlertTriangle },
+]
+
+function getRandomActiveErrors(errorList, maxCount = 5) {
+  const count = Math.floor(Math.random() * maxCount) + 1
+  const shuffled = errorList.sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, count).map((error, index) => ({
+    id: `${error.code}-${Date.now()}-${index}`,
+    ...error,
+    message: `${error.code} is active`,
+    timestamp: new Date().toLocaleTimeString(),
+  }))
+}
 
 export default function SystemAlerts() {
-  const { currentData, history } = useData()
-  const [alerts, setAlerts] = useState([])
-  const [alertsEnabled, setAlertsEnabled] = useState(true)
-  const [showAllAlerts, setShowAllAlerts] = useState(false)
+  const [activeErrors, setActiveErrors] = useState([])
+  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
-    if (!currentData.temp616 || !currentData.measurement617 || !currentData.status615) return
+    const interval = setInterval(() => {
+      setActiveErrors(getRandomActiveErrors(ERROR_LIST, 10))
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [])
 
-    const newAlerts = []
-    const timestamp = new Date().toLocaleString()
-
-    // Temperature alerts
-    if (currentData.temp616.MtrTemp > 70) {
-      newAlerts.push({
-        id: `motor-temp-${Date.now()}`,
-        type: "critical",
-        category: "Temperature",
-        message: `Motor temperature critical: ${currentData.temp616.MtrTemp.toFixed(1)}°C`,
-        timestamp,
-        icon: Thermometer,
-        value: currentData.temp616.MtrTemp,
-        threshold: 70,
-      })
-    }
-
-    // Voltage alerts
-    if (currentData.measurement617.DcBusVolt > 450) {
-      newAlerts.push({
-        id: `voltage-${Date.now()}`,
-        type: "critical",
-        category: "Electrical",
-        message: `DC Bus voltage overvoltage: ${currentData.measurement617.DcBusVolt.toFixed(1)}V`,
-        timestamp,
-        icon: Zap,
-        value: currentData.measurement617.DcBusVolt,
-        threshold: 450,
-      })
-    }
-
-    // System status alerts
-    if (currentData.status615.LimpHomeMode) {
-      newAlerts.push({
-        id: `limp-mode-${Date.now()}`,
-        type: "critical",
-        category: "System",
-        message: "Vehicle in Limp Home Mode",
-        timestamp,
-        icon: AlertTriangle,
-        value: "ACTIVE",
-        threshold: "OFF",
-      })
-    }
-
-    if (newAlerts.length > 0) {
-      setAlerts((prev) => [...newAlerts, ...prev].slice(0, 50)) // Keep last 50 alerts
-    }
-  }, [currentData])
-
-  const clearAlerts = () => {
-    setAlerts([])
-  }
-
-  const criticalAlerts = alerts.filter((alert) => alert.type === "critical")
-
-  const displayedAlerts = showAllAlerts ? criticalAlerts : criticalAlerts.slice(0, 5)
+  const criticalCount = activeErrors.filter((e) => e.type === "critical").length
+  const warningCount = activeErrors.filter((e) => e.type === "warning").length
+  const infoCount = activeErrors.filter((e) => e.type === "info").length
 
   return (
-    <div className="system-alerts">
-      <div className="alerts-header">
-        <div className="alerts-title">
-          <Bell size={20} />
-          <h3>System Alerts</h3>
+    <>
+      <div className="container-full" style={{ padding: "0.1rem 1rem", border: "1px solid rgba(128, 128, 128, 0.3)", borderRadius: "8px", backgroundColor: "rgba(255, 255, 255, 0.05)", marginBottom: "1.5rem" }}>
+        <div className="alerts-header">
+          <div className="alerts-title">
+            <Bell size={20} />
+            <h3>System Alerts</h3>
+          </div>
           <div className="alert-counts">
-            {criticalAlerts.length > 0 && <span className="alert-badge critical">{criticalAlerts.length}</span>}
+            {criticalCount > 0 && <span className="alert-badge critical">Critical: {criticalCount}</span>}
+            {warningCount > 0 && <span className="alert-badge warning">Warning: {warningCount}</span>}
+            {infoCount > 0 && <span className="alert-badge info">Info: {infoCount}</span>}
           </div>
         </div>
 
-        <div className="alerts-controls">
-          <button
-            className={`alert-toggle ${alertsEnabled ? "enabled" : "disabled"}`}
-            onClick={() => setAlertsEnabled(!alertsEnabled)}
-          >
-            {alertsEnabled ? <Bell size={16} /> : <BellOff size={16} />}
-          </button>
-
-          {criticalAlerts.length > 0 && (
-            <button className="clear-alerts" onClick={clearAlerts}>
-              Clear All
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="alerts-summary">
-        <div className="summary-card critical">
-          <XCircle size={16} />
-          <span className="summary-count">{criticalAlerts.length}</span>
-          <span className="summary-label">Critical</span>
-        </div>
-      </div>
-
-      {alertsEnabled && (
-        <div className="alerts-list">
-          {displayedAlerts.length === 0 ? (
+        <div className="alerts-columns-full">
+          {activeErrors.length === 0 ? (
             <div className="no-alerts">
-              <CheckCircle size={24} />
+              <XCircle size={24} />
               <span>All systems operating normally</span>
             </div>
           ) : (
-            displayedAlerts.map((alert) => {
-              const IconComponent = alert.icon
-              return (
-                <div key={alert.id} className={`alert-item ${alert.type}`}>
-                  <div className="alert-icon">
-                    <IconComponent size={18} />
-                  </div>
-                  <div className="alert-content">
-                    <div className="alert-header">
-                      <span className="alert-category">{alert.category}</span>
-                      <span className="alert-time">{alert.timestamp}</span>
+        <div className="alerts-columns-row" style={{ display: "flex", gap: "1rem", paddingBottom: "1rem" }}>
+          <div
+            className="alerts-column critical"
+            style={{
+              flex: 1,
+              borderRight: "2px solid rgba(128, 128, 128, 0.7)",
+              paddingLeft: "1.5rem",
+              paddingRight: "1.5rem",
+              minHeight: "300px",
+              boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <h4 className="column-title">Critical Alerts</h4>
+            {activeErrors
+              .filter((alert) => alert.type === "critical")
+              .map((alert) => {
+                const IconComponent = alert.icon
+                return (
+                  <div key={alert.id} className={`alert-item ${alert.type}`}>
+                    <div className="alert-icon">
+                      <IconComponent size={18} />
                     </div>
-                    <div className="alert-message">{alert.message}</div>
-                    <div className="alert-details">
-                      <span>Current: {typeof alert.value === "number" ? alert.value.toFixed(2) : alert.value}</span>
-                      <span>
-                        Threshold: {typeof alert.threshold === "number" ? alert.threshold.toFixed(2) : alert.threshold}
-                      </span>
+                    <div className="alert-content">
+                      <div className="alert-header">
+                        <span className="alert-category">{alert.code}</span>
+                        <span className="alert-time">{alert.timestamp}</span>
+                      </div>
+                      <div className="alert-message">{alert.message}</div>
                     </div>
                   </div>
-                </div>
-              )
-            })
-          )}
+                )
+              })}
+          </div>
 
-          {criticalAlerts.length > 5 && (
-            <button className="show-more-alerts" onClick={() => setShowAllAlerts(!showAllAlerts)}>
-              {showAllAlerts ? `Show Less` : `Show All ${criticalAlerts.length} Alerts`}
-            </button>
+          <div
+            className="alerts-column warning"
+            style={{
+              flex: 1,
+              borderRight: "2px solid rgba(128, 128, 128, 0.7)",
+              paddingLeft: "1.5rem",
+              paddingRight: "1.5rem",
+              minHeight: "300px",
+              boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <h4 className="column-title">Warning Alerts</h4>
+            {activeErrors
+              .filter((alert) => alert.type === "warning")
+              .map((alert) => {
+                const IconComponent = alert.icon
+                return (
+                  <div key={alert.id} className={`alert-item ${alert.type}`}>
+                    <div className="alert-icon">
+                      <IconComponent size={18} />
+                    </div>
+                    <div className="alert-content">
+                      <div className="alert-header">
+                        <span className="alert-category">{alert.code}</span>
+                        <span className="alert-time">{alert.timestamp}</span>
+                      </div>
+                      <div className="alert-message">{alert.message}</div>
+                    </div>
+                  </div>
+                )
+              })}
+          </div>
+
+          <div
+            className="alerts-column info"
+            style={{
+              flex: 1,
+              paddingLeft: "1.5rem",
+              paddingRight: "1.5rem",
+              minHeight: "300px",
+              boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <h4 className="column-title">Info Alerts</h4>
+            {activeErrors
+              .filter((alert) => alert.type === "info")
+              .map((alert) => {
+                const IconComponent = alert.icon
+                return (
+                  <div key={alert.id} className={`alert-item ${alert.type}`}>
+                    <div className="alert-icon">
+                      <IconComponent size={18} />
+                    </div>
+                    <div className="alert-content">
+                      <div className="alert-header">
+                        <span className="alert-category">{alert.code}</span>
+                        <span className="alert-time">{alert.timestamp}</span>
+                      </div>
+                      <div className="alert-message">{alert.message}</div>
+                    </div>
+                  </div>
+                )
+              })}
+          </div>
+        </div>
           )}
         </div>
-      )}
+      </div>
 
       <style jsx>{`
-        .system-alerts {
+        .container-full {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .container {
+          display: flex;
+          height: 100%;
+          width: 100%;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .left-half {
+          flex: 1;
+          padding: 1.5rem;
           background: rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(20px);
-          border: 1px solid rgba(34, 197, 94, 0.2);
-          border-radius: 16px;
+          border-radius: 16px 0 0 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          overflow-y: auto;
+        }
+
+        .vertical-divider {
+          width: 1px;
+          background-color: rgba(34, 197, 94, 0.3);
+          margin: 0 1rem;
+        }
+
+        .right-half {
+          flex: 1;
           padding: 1.5rem;
-          margin-bottom: 2rem;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          background: transparent;
         }
 
         .alerts-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 1rem;
-          flex-wrap: wrap;
           gap: 1rem;
+          color: #22c55e;
+          flex-wrap: wrap;
         }
 
         .alerts-title {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: #22c55e;
-        }
-
-        .alerts-title h3 {
-          margin: 0;
-          font-size: 1.2rem;
           font-weight: 600;
+          font-size: 1.2rem;
         }
 
         .alert-counts {
           display: flex;
           gap: 0.5rem;
+          flex-wrap: wrap;
         }
 
         .alert-badge {
@@ -205,97 +331,12 @@ export default function SystemAlerts() {
           background: #22c55e;
         }
 
-        .alerts-controls {
-          display: flex;
-          gap: 0.5rem;
-          align-items: center;
-        }
-
-        .alert-toggle {
-          padding: 0.5rem;
-          border: 1px solid rgba(34, 197, 94, 0.3);
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.05);
-          color: inherit;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          font-family: inherit;
-        }
-
-        .alert-toggle.enabled {
-          color: #22c55e;
-          border-color: rgba(34, 197, 94, 0.5);
-        }
-
-        .alert-toggle.disabled {
-          color: #6b7280;
-          opacity: 0.7;
-        }
-
-        .clear-alerts {
-          padding: 0.5rem 1rem;
-          border: 1px solid rgba(239, 68, 68, 0.3);
-          border-radius: 8px;
-          background: rgba(239, 68, 68, 0.1);
-          color: #ef4444;
-          cursor: pointer;
-          font-size: 0.8rem;
-          transition: all 0.3s ease;
-          font-family: inherit;
-        }
-
-        .clear-alerts:hover {
-          background: rgba(239, 68, 68, 0.2);
-        }
-
-        .alerts-summary {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1rem;
-          margin-bottom: 1rem;
-        }
-
-        .summary-card {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.75rem;
-          border-radius: 8px;
-          font-size: 0.9rem;
-        }
-
-        .summary-card.critical {
-          background: rgba(239, 68, 68, 0.1);
-          color: #ef4444;
-          border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .summary-card.warning {
-          background: rgba(245, 158, 11, 0.1);
-          color: #f59e0b;
-          border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .summary-card.info {
-          background: rgba(34, 197, 94, 0.1);
-          color: #22c55e;
-          border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-
-        .summary-count {
-          font-weight: 700;
-          font-size: 1.1rem;
-        }
-
-        .summary-label {
-          font-size: 0.8rem;
-          opacity: 0.8;
-        }
-
         .alerts-list {
           display: flex;
           flex-direction: column;
           gap: 0.75rem;
+          overflow-y: auto;
+          max-height: calc(100vh - 150px);
         }
 
         .no-alerts {
@@ -308,6 +349,29 @@ export default function SystemAlerts() {
           font-weight: 500;
         }
 
+        .alerts-group {
+          margin-bottom: 1rem;
+        }
+
+        .group-title {
+          font-weight: 700;
+          font-size: 1rem;
+          margin-bottom: 0.5rem;
+          color: inherit;
+        }
+
+        .alerts-group.critical .group-title {
+          color: #ef4444;
+        }
+
+        .alerts-group.warning .group-title {
+          color: #f59e0b;
+        }
+
+        .alerts-group.info .group-title {
+          color: #22c55e;
+        }
+
         .alert-item {
           display: flex;
           gap: 0.75rem;
@@ -315,42 +379,31 @@ export default function SystemAlerts() {
           border-radius: 8px;
           border-left: 4px solid;
           transition: all 0.3s ease;
+          cursor: default;
+          background: rgba(255, 255, 255, 0.05);
         }
 
         .alert-item.critical {
-          background: rgba(239, 68, 68, 0.05);
           border-left-color: #ef4444;
         }
 
         .alert-item.warning {
-          background: rgba(245, 158, 11, 0.05);
           border-left-color: #f59e0b;
         }
 
         .alert-item.info {
-          background: rgba(34, 197, 94, 0.05);
           border-left-color: #22c55e;
         }
 
         .alert-item:hover {
           transform: translateX(4px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .alert-icon {
           flex-shrink: 0;
           margin-top: 0.2rem;
-        }
-
-        .alert-item.critical .alert-icon {
-          color: #ef4444;
-        }
-
-        .alert-item.warning .alert-icon {
-          color: #f59e0b;
-        }
-
-        .alert-item.info .alert-icon {
-          color: #22c55e;
+          color: inherit;
         }
 
         .alert-content {
@@ -362,70 +415,43 @@ export default function SystemAlerts() {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 0.25rem;
+          font-weight: 600;
+          font-size: 0.9rem;
+          opacity: 0.85;
         }
 
         .alert-category {
-          font-weight: 600;
-          font-size: 0.8rem;
-          opacity: 0.8;
+          font-weight: 700;
         }
 
         .alert-time {
-          font-size: 0.7rem;
+          font-size: 0.75rem;
           opacity: 0.6;
         }
 
         .alert-message {
           font-weight: 500;
-          margin-bottom: 0.25rem;
-        }
-
-        .alert-details {
-          display: flex;
-          gap: 1rem;
-          font-size: 0.8rem;
-          opacity: 0.7;
-        }
-
-        .show-more-alerts {
-          padding: 0.75rem;
-          border: 1px solid rgba(34, 197, 94, 0.3);
-          border-radius: 8px;
-          background: rgba(34, 197, 94, 0.05);
-          color: #22c55e;
-          cursor: pointer;
-          font-weight: 500;
-          transition: all 0.3s ease;
-          margin-top: 0.5rem;
-          font-family: inherit;
-        }
-
-        .show-more-alerts:hover {
-          background: rgba(34, 197, 94, 0.1);
+          font-size: 0.85rem;
         }
 
         @media (max-width: 768px) {
-          .alerts-header {
+          .container {
             flex-direction: column;
-            align-items: stretch;
           }
-          
-          .alerts-summary {
-            grid-template-columns: 1fr;
+
+          .left-half,
+          .right-half {
+            border-radius: 16px;
+            padding: 1rem;
           }
-          
-          .alert-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.25rem;
-          }
-          
-          .alert-details {
-            flex-direction: column;
-            gap: 0.25rem;
+
+          .vertical-divider {
+            width: 100%;
+            height: 1px;
+            margin: 1rem 0;
           }
         }
       `}</style>
-    </div>
+    </>
   )
 }
