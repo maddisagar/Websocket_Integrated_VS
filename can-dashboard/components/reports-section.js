@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useData } from "./data-context"
+import "../src/app/date-picker.css"
 import {
   AlertCircle,
   BarChart2,
@@ -11,6 +12,7 @@ import {
   Activity,
   ChevronDown,
 } from "lucide-react"
+import AnimatedCounter from "./animated-counter"
 
 function CircularProgress({ percentage }) {
   const radius = 40
@@ -69,7 +71,7 @@ export default function ReportsSection() {
     }
     return dates.sort().reverse()[0]
   }
-  const selectedDate = getLatestDate()
+  const [selectedDate, setSelectedDate] = useState(getLatestDate())
   const reportData = dailyReports[selectedDate] || null
   const [hasError, setHasError] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
@@ -89,7 +91,14 @@ export default function ReportsSection() {
         <div className="reports-section">
           <div className="header-row">
             <h2>Report</h2>
-            {/* Date selector removed to keep static */}
+            <input
+              type="date"
+              value={selectedDate}
+              max={getLatestDate()}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="date-picker"
+              aria-label="Select report date"
+            />
           </div>
           <div className="no-report">No report data available for the selected date.</div>
         </div>
@@ -98,10 +107,17 @@ export default function ReportsSection() {
 
     return (
       <div className="reports-section">
-        <div className="header-row">
-          <h2>Report</h2>
-          {/* Date selector removed to keep static */}
-        </div>
+          <div className="header-row">
+            <h2>Report</h2>
+            <input
+              type="date"
+              value={selectedDate}
+              max={getLatestDate()}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="date-picker"
+              aria-label="Select report date"
+            />
+          </div>
 
         <div className="top-card">
           <div className="critical-alerts">
@@ -137,7 +153,9 @@ export default function ReportsSection() {
               <div>
                 <div className="mode-label">Hill</div>
                 <div className="mode-sub-label">Hold</div>
-                <div className="mode-value">49</div>
+                <div className="mode-value">
+                  <AnimatedCounter value={reportData.systemModesCounts.hillHold} />
+                </div>
               </div>
             </div>
             <div className="mode-item red">
