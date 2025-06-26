@@ -265,6 +265,12 @@ export const DataProvider = ({ children }) => {
     let reconnectTimeoutId
 
     const connect = () => {
+      if (!websocketUrl || websocketUrl === "ws://your-esp32-websocket-url") {
+        console.warn("WebSocket URL is not set or is a placeholder. Skipping WebSocket connection.")
+        setIsConnected(false)
+        return
+      }
+
       ws = new WebSocket(websocketUrl)
 
       ws.onopen = () => {
@@ -296,7 +302,12 @@ export const DataProvider = ({ children }) => {
       }
 
       ws.onerror = (event) => {
-        console.error("WebSocket error event type:", event.type, "event object:", event)
+        // Suppress or handle expected errors gracefully
+        if (event && event.type === "error") {
+          console.warn("WebSocket encountered an error event:", event)
+        } else {
+          console.error("WebSocket error event type:", event.type, "event object:", event)
+        }
       }
     }
 
