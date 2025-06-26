@@ -37,28 +37,28 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
               className={`nav-btn ${currentView === "dashboard" ? "active" : ""}`}
               onClick={() => setCurrentView("dashboard")}
             >
-              <Activity size={18} />
+              <Activity size={22} />
               <span>Dashboard</span>
             </button>
             <button
               className={`nav-btn ${currentView === "graphs" ? "active" : ""}`}
               onClick={() => setCurrentView("graphs")}
             >
-              <BarChart3 size={18} />
+              <BarChart3 size={22} />
               <span>Graphs</span>
             </button>
             <button
               className={`nav-btn ${currentView === "history" ? "active" : ""}`}
               onClick={() => setCurrentView("history")}
             >
-              <History size={18} />
+              <History size={22} />
               <span>History</span>
             </button>
             <button
               className={`nav-btn ${currentView === "reports" ? "active" : ""}`}
               onClick={() => setCurrentView("reports")}
             >
-              <BarChart2 size={18} />
+              <BarChart2 size={22} />
               <span>Reports</span>
             </button>
           </nav>
@@ -178,32 +178,57 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
 
         .desktop-nav {
           display: flex;
-          gap: 0.5rem;
+          gap: 3rem;
+        }
+        .nav-btn span {
+          font-size: 1rem;
         }
 
         .nav-btn {
+          position: relative;
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 1rem;
           padding: 0.75rem 1.5rem;
           border: none;
           border-radius: 10px;
           background: transparent;
           cursor: pointer;
-          transition: all 0.3s ease;
-          font-weight: 500;
+          font-weight: 600;
           color: inherit;
           font-family: inherit;
+          overflow: hidden;
+          transition: color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .nav-btn::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: rgba(34, 197, 94, 0.15);
+          transition: left 0.4s ease;
+          z-index: 0;
+          border-radius: 10px;
         }
 
         .nav-btn:hover {
-          background: rgba(34, 197, 94, 0.1);
-          transform: translateY(-1px);
+          color: #22c55e;
+          transform: scale(1.05);
+          box-shadow: 0 0 8px #22c55e88;
+        }
+
+        .nav-btn:hover::before {
+          left: 0;
         }
 
         .nav-btn.active {
-          background: rgba(34, 197, 94, 0.2);
           color: #22c55e;
+          font-weight: 700;
+          box-shadow: 0 0 12px #22c55ecc;
+          background: rgba(34, 197, 94, 0.2);
         }
 
         .header-actions {

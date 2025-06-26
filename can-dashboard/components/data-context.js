@@ -258,38 +258,51 @@ export const DataProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    const websocketUrl = "ws://your-esp32-websocket-url"
+    const websocketUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://your-esp32-websocket-url"
+    let ws
+    let reconnectInterval = 1000
+    let intervalId
+    let reconnectTimeoutId
 
-    const ws = new WebSocket(websocketUrl)
+    const connect = () => {
+      ws = new WebSocket(websocketUrl)
 
-    ws.onopen = () => {
-      setIsConnected(true)
-      console.log("WebSocket connected to", websocketUrl)
-    }
+      ws.onopen = () => {
+        setIsConnected(true)
+        console.log("WebSocket connected to", websocketUrl)
+        reconnectInterval = 1000 // reset reconnect interval on successful connection
+      }
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        setCurrentData(data)
-        setHistory((prev) => {
-          const updated = [...prev, data]
-          return updated.slice(-100)
-        })
-      } catch (error) {
-        console.error("Error parsing websocket data:", error)
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data)
+          setCurrentData(data)
+          setHistory((prev) => {
+            const updated = [...prev, data]
+            return updated.slice(-100)
+          })
+        } catch (error) {
+          console.error("Error parsing websocket data:", error)
+        }
+      }
+
+      ws.onclose = () => {
+        setIsConnected(false)
+        console.log("WebSocket disconnected, attempting to reconnect...")
+        reconnectTimeoutId = setTimeout(() => {
+          reconnectInterval = Math.min(reconnectInterval * 2, 30000) // exponential backoff max 30s
+          connect()
+        }, reconnectInterval)
+      }
+
+      ws.onerror = (event) => {
+        console.error("WebSocket error event type:", event.type, "event object:", event)
       }
     }
 
-    ws.onclose = () => {
-      setIsConnected(false)
-      console.log("WebSocket disconnected")
-    }
+    connect()
 
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error)
-    }
-
-    const intervalId = setInterval(() => {
+    intervalId = setInterval(() => {
       if (!ws || ws.readyState !== WebSocket.OPEN) {
         setCurrentData((prevData) => {
           const newData = {
@@ -331,8 +344,9 @@ export const DataProvider = ({ children }) => {
     }, 1000)
 
     return () => {
-      ws.close()
+      if (ws) ws.close()
       clearInterval(intervalId)
+      if (reconnectTimeoutId) clearTimeout(reconnectTimeoutId)
     }
   }, [])
 
