@@ -3,7 +3,10 @@ import { useData } from "./data-context"
 import Header from "./header"
 import GraphContainer from "./graph-container"
 import HistoryView from "./history-view"
-import ReportsSection from "./reports-section"
+import dynamic from "next/dynamic"
+import React, { Suspense } from "react"
+
+const ReportsSection = dynamic(() => import("./reports-section.jsx"), { ssr: false })
 import { Activity, BarChart3, Grid3X3 } from "lucide-react"
 import SystemAlerts from "./system-alerts"
 import PerformanceMetrics from "./performance-metrics"
@@ -17,6 +20,15 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 export default function Dashboard() {
   const [darkMode, setDarkMode] = useState(false)
   const [currentView, setCurrentView] = useState("dashboard") // dashboard, graphs, history, reports
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedView = localStorage.getItem("currentView")
+      if (savedView) {
+        setCurrentView(savedView)
+      }
+    }
+  }, [])
   const [graphMode, setGraphMode] = useState("individual") // individual, overlay, quad
   const { isConnected } = useData()
 
@@ -39,6 +51,12 @@ export default function Dashboard() {
       scrub: 1,
     })
   }, [])
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("currentView", currentView)
+    }
+  }, [currentView])
 
   return (
     <div className={`app ${darkMode ? "dark" : "light"}`}>
@@ -90,7 +108,11 @@ export default function Dashboard() {
 
         {currentView === "history" && <HistoryView />}
 
-        {currentView === "reports" && <ReportsSection />}
+        {currentView === "reports" && (
+          <Suspense fallback={<div>Loading report section...</div>}>
+            <ReportsSection />
+          </Suspense>
+        )}
       </main>
 
       <style jsx>{`

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import "../src/app/date-picker.css"
 import {
   AlertCircle,
@@ -81,7 +81,11 @@ const constantReportData = {
 export default function ReportsSection() {
   const reportRef = useRef(null)
 
-  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState(null)
+
+  useEffect(() => {
+    setSelectedDate(new Date())
+  }, [])
 
   const reportData = constantReportData
   const [hasError, setHasError] = useState(false)
@@ -125,6 +129,10 @@ export default function ReportsSection() {
         <div className="error-message">Error loading report: {errorMessage}</div>
       </div>
     )
+  }
+
+  if (!selectedDate) {
+    return <div>Loading...</div>
   }
 
   return (
