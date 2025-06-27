@@ -151,13 +151,11 @@ export const DataProvider = ({ children }) => {
   const [currentData, setCurrentData] = useState(sampleWebSocketData)
   const [history, setHistory] = useState([sampleWebSocketData])
   const [dailyReports, setDailyReports] = useState(() => {
-    // Load from localStorage if available
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("dailyReports")
       if (stored) {
         return JSON.parse(stored)
       } else {
-        // Generate sample data from 2026-06-20 to today
         const startDate = new Date("2026-06-20")
         const today = new Date()
         const reports = {}
@@ -189,24 +187,35 @@ export const DataProvider = ({ children }) => {
     }
     return {}
   })
+
+  const getReportsByDateRange = (startDate, endDate) => {
+    if (!startDate || !endDate) return null
+    const reports = {}
+    let currentDate = new Date(startDate)
+    const lastDate = new Date(endDate)
+    while (currentDate <= lastDate) {
+      const dateStr = currentDate.toISOString().slice(0, 10)
+      if (dailyReports[dateStr]) {
+        reports[dateStr] = dailyReports[dateStr]
+      }
+      currentDate.setDate(currentDate.getDate() + 1)
+    }
+    return reports
+  }
   const [isConnected, setIsConnected] = useState(false)
 
-  // Save dailyReports to localStorage on change
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("dailyReports", JSON.stringify(dailyReports))
     }
   }, [dailyReports])
 
-  // Aggregate daily report from history for a given date (YYYY-MM-DD)
   const aggregateDailyReport = (date) => {
     if (!history || history.length === 0) return null
     const dayData = history.filter((item) => item.timestamp.startsWith(date))
     if (dayData.length === 0) return null
 
     const criticalAlertsCount = dayData.reduce((count, item) => {
-      // Assuming alerts are calculated elsewhere, count critical alerts in dayData
-      // For demo, count status615.LimpHomeMode occurrences as critical alerts
       return count + (item.status615?.LimpHomeMode ? 1 : 0)
     }, 0)
 
@@ -246,7 +255,6 @@ export const DataProvider = ({ children }) => {
     }
   }
 
-  // Update daily report for current day at midnight or on demand
   useEffect(() => {
     const updateDailyReport = () => {
       const today = new Date().toISOString().slice(0, 10)
@@ -272,42 +280,19 @@ export const DataProvider = ({ children }) => {
     }
   }, [history])
 
-  // Function to get report by date or date range
-  const getReportsByDateRange = (startDate, endDate) => {
-    if (!startDate || !endDate) return null
-    const reports = {}
-    let currentDate = new Date(startDate)
-    const lastDate = new Date(endDate)
-    while (currentDate <= lastDate) {
-      const dateStr = currentDate.toISOString().slice(0, 10)
-      if (dailyReports[dateStr]) {
-        reports[dateStr] = dailyReports[dateStr]
-      }
-      currentDate.setDate(currentDate.getDate() + 1)
-    }
-    return reports
-  }
-
+  const websocketUrl = "ws://192.168.4.1:81"
   useEffect(() => {
-    const websocketUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://your-esp32-websocket-url"
     let ws
     let reconnectInterval = 1000
-    let intervalId
     let reconnectTimeoutId
 
     const connect = () => {
-      if (!websocketUrl || websocketUrl === "ws://your-esp32-websocket-url") {
-        console.warn("WebSocket URL is not set or is a placeholder. Skipping WebSocket connection.")
-        setIsConnected(false)
-        return
-      }
-
       ws = new WebSocket(websocketUrl)
 
       ws.onopen = () => {
         setIsConnected(true)
         console.log("WebSocket connected to", websocketUrl)
-        reconnectInterval = 1000 // reset reconnect interval on successful connection
+        reconnectInterval = 1000
       }
 
       ws.onmessage = (event) => {
@@ -327,13 +312,12 @@ export const DataProvider = ({ children }) => {
         setIsConnected(false)
         console.log("WebSocket disconnected, attempting to reconnect...")
         reconnectTimeoutId = setTimeout(() => {
-          reconnectInterval = Math.min(reconnectInterval * 2, 30000) // exponential backoff max 30s
+          reconnectInterval = Math.min(reconnectInterval * 2, 30000)
           connect()
         }, reconnectInterval)
       }
 
       ws.onerror = (event) => {
-        // Suppress or handle expected errors gracefully
         if (event && event.type === "error") {
           console.warn("WebSocket encountered an error event:", event)
         } else {
@@ -344,50 +328,8 @@ export const DataProvider = ({ children }) => {
 
     connect()
 
-    intervalId = setInterval(() => {
-      if (!ws || ws.readyState !== WebSocket.OPEN) {
-        setCurrentData((prevData) => {
-          const newData = {
-            ...prevData,
-            timestamp: new Date().toISOString(),
-            status615: Object.fromEntries(
-              Object.entries(prevData.status615).map(([key, value]) => [
-                key,
-                Math.random() > 0.5 ? !value : value,
-              ])
-            ),
-            temp616: {
-              CtlrTemp1: (prevData.temp616.CtlrTemp1 + (Math.random() * 2 - 1)).toFixed(1),
-              CtlrTemp2: (prevData.temp616.CtlrTemp2 + (Math.random() * 2 - 1)).toFixed(1),
-              CtlrTemp: (prevData.temp616.CtlrTemp + (Math.random() * 2 - 1)).toFixed(1),
-              MtrTemp: (prevData.temp616.MtrTemp + (Math.random() * 2 - 1)).toFixed(1),
-            },
-            measurement617: {
-              AcCurrMeaRms: (prevData.measurement617.AcCurrMeaRms + (Math.random() * 2 - 1)).toFixed(1),
-              DcCurrEstd: (prevData.measurement617.DcCurrEstd + (Math.random() * 2 - 1)).toFixed(1),
-              DcBusVolt: (prevData.measurement617.DcBusVolt + (Math.random() * 2 - 1)).toFixed(1),
-              Mtrspd: Math.min(Math.max(prevData.measurement617.Mtrspd + Math.floor(Math.random() * 21 - 10), 0), 3000),
-              ThrotVolt: (prevData.measurement617.ThrotVolt + (Math.random() * 0.2 - 0.1)).toFixed(1),
-            },
-          }
-          newData.temp616 = Object.fromEntries(
-            Object.entries(newData.temp616).map(([k, v]) => [k, parseFloat(v)])
-          )
-          newData.measurement617 = Object.fromEntries(
-            Object.entries(newData.measurement617).map(([k, v]) => [k, parseFloat(v)])
-          )
-          setHistory((prevHistory) => {
-            const updated = [...prevHistory, newData]
-            return updated.slice(-100)
-          })
-          return newData
-        })
-      }
-    }, 1000)
-
     return () => {
       if (ws) ws.close()
-      clearInterval(intervalId)
       if (reconnectTimeoutId) clearTimeout(reconnectTimeoutId)
     }
   }, [])
