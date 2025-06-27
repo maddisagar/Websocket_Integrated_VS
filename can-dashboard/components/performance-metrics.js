@@ -180,14 +180,14 @@ export default function PerformanceMetrics() {
                 </div>
                 <div className="metric-trend" style={{ color: trendColor }}>
                   <TrendIcon size={16} />
-                  <span>{Math.abs(metric.trend).toFixed(1)}%</span>
+                  <span>{(Math.abs(metric.trend) ?? 0).toFixed(1)}%</span>
                 </div>
               </div>
 
               <div className="metric-content">
                 <h4>{metric.title}</h4>
                 <div className="metric-value">
-                  <span className="value">{metric.value.toFixed(1)}</span>
+                  <span className="value">{(metric.value ?? 0).toFixed(1)}</span>
                   <span className="unit">{metric.unit}</span>
                 </div>
 

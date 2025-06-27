@@ -4,12 +4,11 @@ import { useState, useRef } from "react"
 import { useData } from "./data-context"
 import Chart from "./chart"
 import CustomDropdown from "./custom-dropdown"
-import jsPDF from "jspdf"
 
 export default function GraphContainer({ mode, fullView = false, darkMode = true }) {
   const { history } = useData()
   const [selectedGraphs, setSelectedGraphs] = useState([])
-  const [quadSelection, setQuadSelection] = useState(["DcBusVolt", "Mtrspd", "AcCurrMeaRms", "MtrTemp"])
+  const [quadSelection, setQuadSelection] = useState(["DcBusVolt", "MtrSpd", "AcCurrMeaRms", "MtrTemp"])
 
   // Refs to hold canvas elements for PDF export
   const individualCanvasRefs = useRef([])
@@ -27,13 +26,13 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
     { key: "AcCurrMeaRms", label: "AC Current RMS", category: "measurement617", color: "#22c55e", unit: "A" },
     { key: "DcCurrEstd", label: "DC Current Est", category: "measurement617", color: "#16a34a", unit: "A" },
     { key: "DcBusVolt", label: "DC Bus Voltage", category: "measurement617", color: "#f59e0b", unit: "V" },
-    { key: "Mtrspd", label: "Motor Speed", category: "measurement617", color: "#8b5cf6", unit: "RPM" },
+    { key: "MtrSpd", label: "Motor Speed", category: "measurement617", color: "#8b5cf6", unit: "RPM" },
     { key: "ThrotVolt", label: "Throttle Voltage", category: "measurement617", color: "#06b6d4", unit: "V" },
 
     // Status metrics (0x615) - Key boolean values as numeric for graphing
     { key: "LimpHomeMode", label: "Limp Home Mode", category: "status615", color: "#ef4444", unit: "" },
-    { key: "EcoPost", label: "Eco Mode", category: "status615", color: "#22c55e", unit: "" },
-    { key: "RegeMode", label: "Regen Mode", category: "status615", color: "#8b5cf6", unit: "" },
+    { key: "EcoBoost", label: "Eco Mode", category: "status615", color: "#22c55e", unit: "" },
+    { key: "RegenMode", label: "Regen Mode", category: "status615", color: "#8b5cf6", unit: "" },
     { key: "Forward", label: "Forward Gear", category: "status615", color: "#22c55e", unit: "" },
     { key: "Reverse", label: "Reverse Gear", category: "status615", color: "#f59e0b", unit: "" },
     { key: "Brake", label: "Brake Status", category: "status615", color: "#ef4444", unit: "" },
@@ -50,7 +49,6 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
       return updated
     })
   }
-
 
   if (mode === "individual" || fullView) {
     return (

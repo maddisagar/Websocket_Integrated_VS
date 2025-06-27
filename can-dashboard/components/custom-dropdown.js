@@ -1,103 +1,86 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
+import { ChevronDown } from "lucide-react"
 
-export default function CustomDropdown({ options, value, onChange, label, darkMode }) {
+export default function CustomDropdown({ options, value, onChange, label, darkMode = true }) {
   const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef(null)
 
-  const toggleOpen = () => setIsOpen(!isOpen)
-
-  const handleOptionClick = (optionValue) => {
-    onChange(optionValue)
-    setIsOpen(false)
-  }
-
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsOpen(false)
-    }
-  }
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
+  const selectedOption = options.find((opt) => opt.value === value)
 
   return (
-    <div className={`custom-dropdown ${darkMode ? "dark" : "light"}`} ref={dropdownRef}>
-      <label className="dropdown-label">{label}</label>
-      <button className="dropdown-toggle" onClick={toggleOpen} aria-haspopup="listbox" aria-expanded={isOpen}>
-        {options.find((opt) => opt.value === value)?.label || "Select..."}
-        <span className="arrow">{isOpen ? "▲" : "▼"}</span>
-      </button>
-      {isOpen && (
-        <ul className="dropdown-menu" role="listbox" tabIndex={-1}>
-          {options.map((option) => (
-            <li
-              key={option.value}
-              role="option"
-              aria-selected={option.value === value}
-              tabIndex={0}
-              className={`dropdown-option ${option.value === value ? "selected" : ""}`}
-              onClick={() => handleOptionClick(option.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault()
-                  handleOptionClick(option.value)
-                }
-              }}
-            >
-              {option.label}
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="dropdown-container">
+      {label && <label className="dropdown-label">{label}</label>}
+      <div className="dropdown-wrapper">
+        <button className="dropdown-button" onClick={() => setIsOpen(!isOpen)} type="button">
+          <span>{selectedOption?.label || "Select option"}</span>
+          <ChevronDown size={16} className={`dropdown-icon ${isOpen ? "open" : ""}`} />
+        </button>
+
+        {isOpen && (
+          <div className="dropdown-menu">
+            {options.map((option) => (
+              <button
+                key={option.value}
+                className={`dropdown-option ${option.value === value ? "selected" : ""}`}
+                onClick={() => {
+                  onChange(option.value)
+                  setIsOpen(false)
+                }}
+                type="button"
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <style jsx>{`
-        .custom-dropdown {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-          font-family: inherit;
-          width: 100%;
-          max-width: 300px;
+        .dropdown-container {
           position: relative;
-          user-select: none;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
         .dropdown-label {
+          display: block;
           font-weight: 600;
+          color: #22c55e;
           font-size: 0.9rem;
-          margin-bottom: 0.25rem;
-          color: var(--label-color);
+          margin-bottom: 0.5rem;
         }
 
-        .dropdown-toggle {
-          background: var(--bg-color);
-          color: var(--text-color);
-          border: 1px solid var(--border-color);
-          border-radius: 8px;
+        .dropdown-wrapper {
+          position: relative;
+        }
+
+        .dropdown-button {
+          width: 100%;
           padding: 0.5rem;
+          border: 1px solid rgba(34, 197, 94, 0.3);
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.05);
+          color: inherit;
           font-size: 0.9rem;
-          cursor: pointer;
+          font-family: inherit;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          appearance: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
         }
 
-        .dropdown-toggle:focus {
-          outline: none;
-          border-color: var(--focus-border-color);
-          box-shadow: 0 0 0 3px var(--focus-shadow-color);
+        .dropdown-button:hover {
+          border-color: rgba(34, 197, 94, 0.5);
+          background: rgba(255, 255, 255, 0.08);
         }
 
-        .arrow {
-          margin-left: 0.5rem;
-          font-size: 0.7rem;
+        .dropdown-icon {
+          transition: transform 0.3s ease;
+        }
+
+        .dropdown-icon.open {
+          transform: rotate(180deg);
         }
 
         .dropdown-menu {
@@ -105,55 +88,36 @@ export default function CustomDropdown({ options, value, onChange, label, darkMo
           top: 100%;
           left: 0;
           right: 0;
-          background: var(--bg-color);
-          border: 1px solid var(--border-color);
+          z-index: 1000;
+          background: rgba(0, 0, 0, 0.9);
+          border: 1px solid rgba(34, 197, 94, 0.3);
           border-radius: 8px;
           margin-top: 0.25rem;
           max-height: 200px;
           overflow-y: auto;
-          z-index: 1000;
-          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(20px);
         }
 
         .dropdown-option {
+          width: 100%;
           padding: 0.5rem;
+          border: none;
+          background: transparent;
+          color: inherit;
+          font-size: 0.9rem;
+          font-family: inherit;
+          text-align: left;
           cursor: pointer;
-          color: var(--text-color);
+          transition: all 0.3s ease;
         }
 
-        .dropdown-option:hover,
-        .dropdown-option:focus {
-          background: var(--hover-bg-color);
-          outline: none;
+        .dropdown-option:hover {
+          background: rgba(34, 197, 94, 0.1);
         }
 
         .dropdown-option.selected {
-          background: var(--selected-bg-color);
-          font-weight: 700;
-        }
-
-        /* Light mode variables */
-        .light {
-          --bg-color: #f0f9ff;
-          --text-color: #0f172a;
-          --border-color: #16a34a;
-          --focus-border-color: #16a34a;
-          --focus-shadow-color: rgba(22, 163, 74, 0.4);
-          --hover-bg-color: #d1fae5;
-          --selected-bg-color: #a7f3d0;
-          --label-color: #166534;
-        }
-
-        /* Dark mode variables */
-        .dark {
-          --bg-color: #0f172a;
-          --text-color: #22c55e;
-          --border-color: rgba(34, 197, 94, 0.7);
-          --focus-border-color: #16a34a;
-          --focus-shadow-color: rgba(34, 197, 94, 0.4);
-          --hover-bg-color: rgba(34, 197, 94, 0.2);
-          --selected-bg-color: rgba(34, 197, 94, 0.4);
-          --label-color: #22c55e;
+          background: rgba(34, 197, 94, 0.2);
+          color: #22c55e;
         }
       `}</style>
     </div>

@@ -245,7 +245,7 @@ export default function EnhancedStatusCards() {
                   <span className="measurement-label">{measurement.label}</span>
                 </div>
                 <div className="measurement-value">
-                  <span className="value">{measurement.value.toFixed(2)}</span>
+                  <span className="value">{(measurement.value ?? 0).toFixed(2)}</span>
                   <span className="unit">{measurement.unit}</span>
                 </div>
               </div>
