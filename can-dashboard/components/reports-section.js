@@ -14,6 +14,9 @@ import {
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas"
+
 function CircularProgress({ percentage }) {
   const radius = 40
   const stroke = 8
@@ -86,7 +89,33 @@ export default function ReportsSection() {
 
   // Define the handleDownloadPDF function to fix ReferenceError
   function handleDownloadPDF() {
-    alert("Download PDF functionality is not implemented yet.")
+    if (!reportRef.current) return
+
+    const input = reportRef.current
+    html2canvas(input, { scale: 2, useCORS: true })
+      .then((canvas) => {
+        const imgData = canvas.toDataURL("image/png")
+        const padding = 20
+        const extraTopSpace = 30
+        const pdfWidth = canvas.width + padding * 2
+        const pdfHeight = canvas.height + padding * 2 + extraTopSpace
+        const pdf = new jsPDF({
+          orientation: "landscape",
+          unit: "pt",
+          format: [pdfWidth, pdfHeight],
+        })
+        const dateStr = new Date().toISOString().split("T")[0]
+        // Add date text at top center
+        pdf.setFontSize(32)
+        const textWidth = pdf.getTextWidth(dateStr)
+        pdf.text(dateStr, (pdfWidth - textWidth) / 2, padding + 15)
+        // Add image below the date text
+        pdf.addImage(imgData, "PNG", padding, padding + extraTopSpace, canvas.width, canvas.height)
+        pdf.save(`report-${dateStr}.pdf`)
+      })
+      .catch((err) => {
+        alert("Failed to generate PDF: " + err.message)
+      })
   }
 
   if (hasError) {
