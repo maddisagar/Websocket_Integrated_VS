@@ -18,7 +18,7 @@ import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 export default function Dashboard() {
-  const [darkMode, setDarkMode] = useState(true)
+const [darkMode, setDarkMode] = useState(false)
   const [currentView, setCurrentView] = useState("dashboard") // dashboard, graphs, history, reports
   const [dashboardTab, setDashboardTab] = useState("performance") // performance, vehicleControl, driveModes, safetySystems, systemControl, sensor, temperature
 
@@ -120,21 +120,21 @@ export default function Dashboard() {
                 className={`control-btn ${graphMode === "individual" ? "active" : ""}`}
                 onClick={() => setGraphMode("individual")}
               >
-                <BarChart3 size={16} />
+                <BarChart3 size={12} />
                 Individual
               </button>
               <button
                 className={`control-btn ${graphMode === "overlay" ? "active" : ""}`}
                 onClick={() => setGraphMode("overlay")}
               >
-                <Activity size={16} />
+                <Activity size={12} />
                 Overlay
               </button>
               <button
                 className={`control-btn ${graphMode === "quad" ? "active" : ""}`}
                 onClick={() => setGraphMode("quad")}
               >
-                <Grid3X3 size={16} />
+                <Grid3X3 size={12} />
                 Quad View
               </button>
             </div>
