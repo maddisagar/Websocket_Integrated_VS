@@ -83,7 +83,7 @@ export default function Dashboard() {
                 className={`tab-btn ${dashboardTab === "vehicle" ? "active" : ""}`}
                 onClick={() => setDashboardTab("vehicle")}
               >
-                Vehicle Control & Drive Modes & Safety Systems & System Control
+              Vehicle Control & Drive Modes
               </button>
               <button
                 className={`tab-btn ${dashboardTab === "sensor" ? "active" : ""}`}
@@ -91,19 +91,26 @@ export default function Dashboard() {
               >
                 Sensor Health Status
               </button>
-              <button
-                className={`tab-btn ${dashboardTab === "temperature" ? "active" : ""}`}
-                onClick={() => setDashboardTab("temperature")}
-              >
-                Temperature Monitoring
-              </button>
-            </div>
+            <button
+              className={`tab-btn ${dashboardTab === "temperature" ? "active" : ""}`}
+              onClick={() => setDashboardTab("temperature")}
+            >
+              Temperature Monitoring
+            </button>
+            <button
+              className={`tab-btn ${dashboardTab === "alerts" ? "active" : ""}`}
+              onClick={() => setDashboardTab("alerts")}
+            >
+              System Alerts
+            </button>
+          </div>
 
-            {dashboardTab === "performance" && <PerformanceMetrics />}
-            {dashboardTab === "vehicle" && <EnhancedStatusCards showOnlyStatusGroups={true} />}
-            {dashboardTab === "sensor" && <EnhancedStatusCards showOnlySensorHealth={true} />}
-            {dashboardTab === "temperature" && <EnhancedStatusCards showOnlyTemperature={true} />}
-          </>
+          {dashboardTab === "performance" && <PerformanceMetrics />}
+          {dashboardTab === "vehicle" && <EnhancedStatusCards showOnlyStatusGroups={true} />}
+          {dashboardTab === "sensor" && <EnhancedStatusCards showOnlySensorHealth={true} />}
+          {dashboardTab === "temperature" && <EnhancedStatusCards showOnlyTemperature={true} />}
+          {dashboardTab === "alerts" && <SystemAlerts />}
+        </>
         )}
 
         {currentView === "graphs" && (
@@ -153,8 +160,8 @@ export default function Dashboard() {
         }
 
         .tab-btn {
-          background: rgba(34, 197, 94, 0.1);
-          border: none;
+          background: rgb(247, 249, 248);
+          border: 1px solid rgb(0, 0, 0);
           padding: 0.5rem 1rem;
           border-radius: 8px;
           cursor: pointer;
