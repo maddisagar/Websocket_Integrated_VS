@@ -8,14 +8,11 @@ import {
   Power,
   Navigation,
   Thermometer,
-  Gauge,
-  Activity,
   Shield,
   Settings,
-  Zap,
 } from "lucide-react"
 
-export default function EnhancedStatusCards() {
+export default function EnhancedStatusCards({ showOnlyStatusGroups = false, showOnlySensorHealth = false, showOnlyTemperature = false }) {
   const { currentData } = useData()
 
   if (!currentData.status615) return null
@@ -89,40 +86,6 @@ export default function EnhancedStatusCards() {
       ]
     : []
 
-  const measurements = currentData.measurement617
-    ? [
-        {
-          key: "AcCurrMeaRms",
-          label: "AC Current RMS",
-          value: currentData.measurement617.AcCurrMeaRms,
-          unit: "A",
-          icon: Activity,
-        },
-        {
-          key: "DcCurrEstd",
-          label: "DC Current Est",
-          value: currentData.measurement617.DcCurrEstd,
-          unit: "A",
-          icon: Activity,
-        },
-        {
-          key: "DcBusVolt",
-          label: "DC Bus Voltage",
-          value: currentData.measurement617.DcBusVolt,
-          unit: "V",
-          icon: Zap,
-        },
-        { key: "Mtrspd", label: "Motor Speed", value: currentData.measurement617.Mtrspd, unit: "RPM", icon: Gauge },
-        {
-          key: "ThrotVolt",
-          label: "Throttle Voltage",
-          value: currentData.measurement617.ThrotVolt,
-          unit: "V",
-          icon: Zap,
-        },
-      ]
-    : []
-
   const getHealthyCount = () => {
     return sensorHealthItems.filter((item) => currentData.status615[item.key]).length
   }
@@ -136,123 +99,101 @@ export default function EnhancedStatusCards() {
   return (
     <div className="enhanced-status-cards">
       {/* Status Groups */}
-      <div className="status-groups">
-        {statusGroups.map((group) => {
-          const IconComponent = group.icon
-          return (
-            <div key={group.title} className="status-group">
-              <div className="group-header" style={{ color: group.color }}>
-                <IconComponent size={20} />
-                <h4>{group.title}</h4>
+      {(showOnlyStatusGroups || (!showOnlySensorHealth && !showOnlyTemperature)) && (
+        <div className="status-groups">
+          {statusGroups.map((group) => {
+            const IconComponent = group.icon
+            return (
+        <div key={group.title} className="status-group">
+          <div className="group-header" style={{ color: group.color }}>
+            <IconComponent size={20} />
+            <h4>{group.title}</h4>
+          </div>
+          <div className="group-items">
+            {group.items.map((item) => (
+              <div key={item.key} className={`status-item ${item.value ? "active" : "inactive"}`}>
+                <span className="item-label">{item.label}</span>
+                <div className={`status-indicator ${item.value ? "on" : "off"}`}>
+                  {item.value ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                </div>
               </div>
-              <div className="group-items">
-                {group.items.map((item) => (
-                  <div key={item.key} className={`status-item ${item.value ? "active" : "inactive"}`}>
-                    <span className="item-label">{item.label}</span>
-                    <div className={`status-indicator ${item.value ? "on" : "off"}`}>
-                      {item.value ? <CheckCircle size={14} /> : <XCircle size={14} />}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Sensor Health Overview */}
-      <div className="sensor-health-section">
-        <div className="section-header">
-          <Shield size={20} />
-          <h3>Sensor Health Status</h3>
-          <div className="health-summary">
-            <span className="healthy-count">
-              {getHealthyCount()}/{sensorHealthItems.length}
-            </span>
-            <span className="health-label">Healthy</span>
+            ))}
           </div>
         </div>
-
-        <div className="sensor-grid">
-          {sensorHealthItems.map((sensor) => {
-            const isHealthy = currentData.status615[sensor.key]
-            return (
-              <div key={sensor.key} className={`sensor-item ${isHealthy ? "healthy" : "unhealthy"}`}>
-                <span className="sensor-label">{sensor.label}</span>
-                <div className={`sensor-status ${isHealthy ? "ok" : "error"}`}>
-                  {isHealthy ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                </div>
-              </div>
             )
           })}
         </div>
-      </div>
+      )}
 
-      {/* Temperature Monitoring */}
-      <div className="temperature-section">
-        <div className="section-header">
-          <Thermometer size={20} />
-          <h3>Temperature Monitoring</h3>
-        </div>
+      {/* Sensor Health Overview */}
+      {(showOnlySensorHealth || (!showOnlyStatusGroups && !showOnlyTemperature)) && (
+        <div className="sensor-health-section">
+          <div className="section-header">
+            <Shield size={20} />
+            <h3>Sensor Health Status</h3>
+            <div className="health-summary">
+              <span className="healthy-count">{getHealthyCount()}/{sensorHealthItems.length}</span>
+              <span className="health-label">Healthy</span>
+            </div>
+          </div>
 
-        <div className="temp-grid">
-          {temperatures.map((temp) => {
-            const status = getTemperatureStatus(temp.value)
-            return (
-              <div key={temp.key} className={`temp-card ${status}`}>
-                <div className="temp-header">
-                  <span className="temp-label">{temp.label}</span>
-                  <div className={`temp-status-icon ${status}`}>
-                    {status === "critical" ? (
-                      <AlertTriangle size={16} />
-                    ) : status === "warning" ? (
-                      <AlertTriangle size={16} />
-                    ) : (
-                      <CheckCircle size={16} />
-                    )}
+          <div className="sensor-grid">
+            {sensorHealthItems.map((sensor) => {
+              const isHealthy = currentData.status615[sensor.key]
+              return (
+                <div key={sensor.key} className={`sensor-item ${isHealthy ? "healthy" : "unhealthy"}`}>
+                  <span className="sensor-label">{sensor.label}</span>
+                  <div className={`sensor-status ${isHealthy ? "ok" : "error"}`}>
+                    {isHealthy ? <CheckCircle size={12} /> : <XCircle size={12} />}
                   </div>
                 </div>
-                <div className="temp-value">
-                  <span className="value">{temp.value.toFixed(1)}</span>
-                  <span className="unit">{temp.unit}</span>
-                </div>
-                <div className="temp-bar">
-                  <div
-                    className={`temp-fill ${status}`}
-                    style={{ width: `${Math.min((temp.value / 100) * 100, 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Measurements */}
-      <div className="measurements-section">
-        <div className="section-header">
-          <Activity size={20} />
-          <h3>Live Measurements</h3>
-        </div>
+      {/* Temperature Monitoring */}
+      {(showOnlyTemperature || (!showOnlyStatusGroups && !showOnlySensorHealth)) && (
+        <div className="temperature-section">
+          <div className="section-header">
+            <Thermometer size={20} />
+            <h3>Temperature Monitoring</h3>
+          </div>
 
-        <div className="measurements-grid">
-          {measurements.map((measurement) => {
-            const IconComponent = measurement.icon
-            return (
-              <div key={measurement.key} className="measurement-card">
-                <div className="measurement-header">
-                  <IconComponent size={18} />
-                  <span className="measurement-label">{measurement.label}</span>
+          <div className="temp-grid">
+            {temperatures.map((temp) => {
+              const status = getTemperatureStatus(temp.value)
+              return (
+                <div key={temp.key} className={`temp-card ${status}`}>
+                  <div className="temp-header">
+                    <span className="temp-label">{temp.label}</span>
+                    <div className={`temp-status-icon ${status}`}>
+                      {status === "critical" ? (
+                        <AlertTriangle size={16} />
+                      ) : status === "warning" ? (
+                        <AlertTriangle size={16} />
+                      ) : (
+                        <CheckCircle size={16} />
+                      )}
+                    </div>
+                  </div>
+                  <div className="temp-value">
+                    <span className="value">{temp.value.toFixed(1)}</span>
+                    <span className="unit">{temp.unit}</span>
+                  </div>
+                  <div className="temp-bar">
+                    <div
+                      className={`temp-fill ${status}`}
+                      style={{ width: `${Math.min((temp.value / 100) * 100, 100)}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="measurement-value">
-                  <span className="value">{(measurement.value ?? 0).toFixed(2)}</span>
-                  <span className="unit">{measurement.unit}</span>
-                </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       <style jsx>{`
         .enhanced-status-cards {
@@ -272,7 +213,7 @@ export default function EnhancedStatusCards() {
         .status-group {
           background: rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(20px);
-          border: 1px solid rgba(34, 197, 94, 0.2);
+          border: 3px solid rgba(34, 197, 94, 0.2);
           border-radius: 16px;
           padding: 1.5rem;
           transition: all 0.3s ease;
@@ -341,10 +282,10 @@ export default function EnhancedStatusCards() {
           color: #6b7280;
         }
 
-        .sensor-health-section, .temperature-section, .measurements-section {
+        .sensor-health-section, .temperature-section {
           background: rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(20px);
-          border: 1px solid rgba(34, 197, 94, 0.2);
+          border: 3px solid rgba(34, 197, 94, 0.2);
           border-radius: 16px;
           padding: 1.5rem;
         }
@@ -439,145 +380,6 @@ export default function EnhancedStatusCards() {
         .temp-card.critical {
           background: rgba(239, 68, 68, 0.05);
           border-color: rgba(239, 68, 68, 0.3);
-        }
-
-        .temp-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 0.5rem;
-        }
-
-        .temp-label {
-          font-size: 0.9rem;
-          font-weight: 500;
-        }
-
-        .temp-status-icon.normal {
-          color: #22c55e;
-        }
-
-        .temp-status-icon.warning {
-          color: #f59e0b;
-        }
-
-        .temp-status-icon.critical {
-          color: #ef4444;
-        }
-
-        .temp-value {
-          display: flex;
-          align-items: baseline;
-          gap: 0.25rem;
-          margin-bottom: 0.75rem;
-        }
-
-        .temp-value .value {
-          font-size: 1.5rem;
-          font-weight: 700;
-        }
-
-        .temp-value .unit {
-          font-size: 0.8rem;
-          opacity: 0.7;
-        }
-
-        .temp-bar {
-          width: 100%;
-          height: 4px;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 2px;
-          overflow: hidden;
-        }
-
-        .temp-fill {
-          height: 100%;
-          border-radius: 2px;
-          transition: width 0.5s ease;
-        }
-
-        .temp-fill.normal {
-          background: #22c55e;
-        }
-
-        .temp-fill.warning {
-          background: #f59e0b;
-        }
-
-        .temp-fill.critical {
-          background: #ef4444;
-        }
-
-        .measurements-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 1rem;
-        }
-
-        .measurement-card {
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 12px;
-          padding: 1rem;
-          transition: all 0.3s ease;
-        }
-
-        .measurement-card:hover {
-          transform: translateY(-2px);
-          border-color: rgba(34, 197, 94, 0.3);
-        }
-
-        .measurement-header {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin-bottom: 0.75rem;
-          color: #22c55e;
-        }
-
-        .measurement-label {
-          font-size: 0.9rem;
-          font-weight: 500;
-        }
-
-        .measurement-value {
-          display: flex;
-          align-items: baseline;
-          gap: 0.5rem;
-        }
-
-        .measurement-value .value {
-          font-size: 1.4rem;
-          font-weight: 700;
-        }
-
-        .measurement-value .unit {
-          font-size: 0.8rem;
-          opacity: 0.7;
-        }
-
-        @media (max-width: 768px) {
-          .status-groups {
-            grid-template-columns: 1fr;
-          }
-          
-          .sensor-grid {
-            grid-template-columns: 1fr;
-          }
-          
-          .temp-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          
-          .measurements-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .temp-grid {
-            grid-template-columns: 1fr;
-          }
         }
       `}</style>
     </div>

@@ -15,7 +15,7 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
               <Activity size={32} />
             </div>
             <div className="title-section">
-              <h1>CAN Dashboard</h1>
+              <h1>DCU Dashboard</h1>
               <div className="connection-status">
                 {isConnected ? (
                   <>

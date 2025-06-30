@@ -18,8 +18,9 @@ import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 export default function Dashboard() {
-  const [darkMode, setDarkMode] = useState(false)
+  const [darkMode, setDarkMode] = useState(true)
   const [currentView, setCurrentView] = useState("dashboard") // dashboard, graphs, history, reports
+  const [dashboardTab, setDashboardTab] = useState("performance") // performance, vehicleControl, driveModes, safetySystems, systemControl, sensor, temperature
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -71,9 +72,37 @@ export default function Dashboard() {
       <main className="main-content" style={{ padding: "1rem 2rem" }}>
         {currentView === "dashboard" && (
           <>
-            <PerformanceMetrics />
-            <SystemAlerts />
-            <EnhancedStatusCards />
+            <div className="dashboard-tabs">
+              <button
+                className={`tab-btn ${dashboardTab === "performance" ? "active" : ""}`}
+                onClick={() => setDashboardTab("performance")}
+              >
+                Performance Metrics
+              </button>
+              <button
+                className={`tab-btn ${dashboardTab === "vehicle" ? "active" : ""}`}
+                onClick={() => setDashboardTab("vehicle")}
+              >
+                Vehicle Control & Drive Modes & Safety Systems & System Control
+              </button>
+              <button
+                className={`tab-btn ${dashboardTab === "sensor" ? "active" : ""}`}
+                onClick={() => setDashboardTab("sensor")}
+              >
+                Sensor Health Status
+              </button>
+              <button
+                className={`tab-btn ${dashboardTab === "temperature" ? "active" : ""}`}
+                onClick={() => setDashboardTab("temperature")}
+              >
+                Temperature Monitoring
+              </button>
+            </div>
+
+            {dashboardTab === "performance" && <PerformanceMetrics />}
+            {dashboardTab === "vehicle" && <EnhancedStatusCards showOnlyStatusGroups={true} />}
+            {dashboardTab === "sensor" && <EnhancedStatusCards showOnlySensorHealth={true} />}
+            {dashboardTab === "temperature" && <EnhancedStatusCards showOnlyTemperature={true} />}
           </>
         )}
 
@@ -116,62 +145,31 @@ export default function Dashboard() {
       </main>
 
       <style jsx>{`
-        .graph-controls {
+        .dashboard-tabs {
           display: flex;
           gap: 1rem;
           margin-bottom: 1rem;
-          flex-wrap: nowrap;
+          flex-wrap: wrap;
         }
 
-        .control-btn {
+        .tab-btn {
           background: rgba(34, 197, 94, 0.1);
           border: none;
           padding: 0.5rem 1rem;
           border-radius: 8px;
           cursor: pointer;
           font-weight: 600;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
           transition: background-color 0.3s ease;
           white-space: nowrap;
         }
 
-        .control-btn:hover {
+        .tab-btn:hover {
           background: rgba(34, 197, 94, 0.2);
         }
 
-        .control-btn.active {
+        .tab-btn.active {
           background: #22c55e;
           color: white;
-        }
-
-        @media (max-width: 768px) {
-          .graph-controls {
-            flex-wrap: wrap;
-            gap: 0.5rem;
-          }
-
-          .control-btn {
-            flex: 1 1 45%;
-            padding: 0.4rem 0.8rem;
-            font-size: 0.9rem;
-            white-space: normal;
-            justify-content: center;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .graph-controls {
-            flex-direction: column;
-            gap: 0.25rem;
-          }
-
-          .control-btn {
-            flex: 1 1 100%;
-            padding: 0.3rem 0.6rem;
-            font-size: 0.85rem;
-          }
         }
       `}</style>
     </div>
