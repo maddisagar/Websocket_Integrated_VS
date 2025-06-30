@@ -1,7 +1,8 @@
 "use client"
 
 import { useData } from "./data-context"
-import { TrendingUp, TrendingDown, Minus, Gauge, Thermometer, Zap, Activity } from "lucide-react"
+import { TrendingUp, TrendingDown, Minus, Gauge, Zap, Activity } from "lucide-react"
+import Odometer from "./odometer"
 
 export default function PerformanceMetrics() {
   const { currentData, history, alerts } = useData()
@@ -96,7 +97,7 @@ export default function PerformanceMetrics() {
       value: currentData.temp616.MtrTemp,
       unit: "°C",
       trend: calculateTrend("MtrTemp", "temp616"),
-      icon: Thermometer,
+      icon: Gauge,
       color: "#ef4444",
       max: 100,
     },
@@ -170,7 +171,7 @@ export default function PerformanceMetrics() {
           const TrendIcon = getTrendIcon(metric.trend)
           const trendColor = getTrendColor(metric.trend)
           const IconComponent = metric.icon
-          const percentage = (metric.value / metric.max) * 100
+          // const percentage = (metric.value / metric.max) * 100
 
           return (
             <div key={metric.title} className="metric-card">
@@ -191,20 +192,14 @@ export default function PerformanceMetrics() {
                   <span className="unit">{metric.unit}</span>
                 </div>
 
-                <div className="metric-bar">
-                <div
-                  className="metric-fill"
-                  style={{
-                    width: `${Math.min(percentage, 100)}%`,
-                    backgroundColor: metric.color,
-                  }}
-                ></div>
-                </div>
+                <Odometer
+                  value={metric.value ?? 0}
+                  max={metric.max}
+                  unit={metric.unit}
+                  color={metric.color}
+                />
 
-                <div className="metric-range">
-                  <span>0</span>
-                  <span>{metric.max}</span>
-                </div>
+                {/* Removed metric-range as odometer shows range visually */}
               </div>
             </div>
           )
@@ -334,28 +329,6 @@ export default function PerformanceMetrics() {
         .metric-value .unit {
           font-size: 0.9rem;
           opacity: 0.7;
-        }
-
-        .metric-bar {
-          width: 100%;
-          height: 6px;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 3px;
-          overflow: hidden;
-          margin-bottom: 0.5rem;
-        }
-
-        .metric-fill {
-          height: 100%;
-          border-radius: 3px;
-          transition: width 0.5s ease;
-        }
-
-        .metric-range {
-          display: flex;
-          justify-content: space-between;
-          font-size: 0.7rem;
-          opacity: 0.6;
         }
 
         @media (max-width: 768px) {
