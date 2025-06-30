@@ -38,28 +38,28 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
               onClick={() => setCurrentView("dashboard")}
             >
               <Activity size={22} />
-              <span>Dashboard</span>
+              <span>DASHBOARD</span>
             </button>
             <button
               className={`nav-btn ${currentView === "graphs" ? "active" : ""}`}
               onClick={() => setCurrentView("graphs")}
             >
               <BarChart3 size={22} />
-              <span>Graphs</span>
+              <span>GRAPHS</span>
             </button>
             <button
               className={`nav-btn ${currentView === "history" ? "active" : ""}`}
               onClick={() => setCurrentView("history")}
             >
               <History size={22} />
-              <span>History</span>
+              <span>HISTORY</span>
             </button>
             <button
               className={`nav-btn ${currentView === "reports" ? "active" : ""}`}
               onClick={() => setCurrentView("reports")}
             >
               <BarChart2 size={22} />
-              <span>Reports</span>
+              <span>REPORTS</span>
             </button>
           </nav>
 
@@ -84,7 +84,7 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
               }}
             >
               <Activity size={18} />
-              <span>Dashboard</span>
+              <span>DASHBOARD</span>
             </button>
             <button
               className={`mobile-nav-btn ${currentView === "graphs" ? "active" : ""}`}
@@ -94,7 +94,7 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
               }}
             >
               <BarChart3 size={18} />
-              <span>Graphs</span>
+              <span>GRAPHS</span>
             </button>
             <button
               className={`mobile-nav-btn ${currentView === "history" ? "active" : ""}`}
@@ -104,7 +104,7 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
               }}
             >
               <History size={18} />
-              <span>History</span>
+              <span>HISTORY</span>
             </button>
             <button
               className={`mobile-nav-btn ${currentView === "reports" ? "active" : ""}`}
@@ -114,7 +114,7 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
               }}
             >
               <BarChart2 size={18} />
-              <span>Reports</span>
+              <span>REPORTS</span>
             </button>
           </div>
         )}
@@ -194,7 +194,7 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
           border-radius: 10px;
           background: transparent;
           cursor: pointer;
-          font-weight: 600;
+          font-weight: 800;
           color: inherit;
           font-family: inherit;
           overflow: hidden;
