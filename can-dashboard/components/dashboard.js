@@ -178,6 +178,60 @@ const [darkMode, setDarkMode] = useState(false)
           background: #22c55e;
           color: white;
         }
+
+        .graph-controls {
+          display: flex;
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+
+        .control-btn {
+          background: rgb(247, 249, 248);
+          border: 1px solid rgb(0, 0, 0);
+          padding: 0.25rem 0.5rem;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: background-color 0.3s ease;
+          white-space: nowrap;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        .control-btn:hover {
+          background: rgba(34, 197, 94, 0.2);
+        }
+
+        .control-btn.active {
+          background: #22c55e;
+          color: white;
+        }
+
+        @media (max-width: 768px) {
+          .dashboard-tabs {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .tab-btn {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+          }
+
+          .graph-controls {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .control-btn {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+          }
+        }
       `}</style>
     </div>
   )

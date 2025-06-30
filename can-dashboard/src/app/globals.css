@@ -576,8 +576,9 @@ input[type="date"] {
 }
 
 .app.dark .header .logo {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.6);
+  /* Removed green box background and shadow for dark mode logo */
+  background: none;
+  box-shadow: none;
   color: white;
 }
 
@@ -757,6 +758,21 @@ img, svg {
   body {
     overflow-x: hidden;
   }
+}
+
+/* Fix for dark mode full page usage */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.app.dark .main-content {
+  padding-top: 1rem !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-radius: 0 !important;
+  min-height: 100vh;
 }
 
 /* Responsive styles for reports section */
