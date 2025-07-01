@@ -3,8 +3,11 @@ import type { Metadata } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "CAN Bus Dashboard",
+  title: "DCU Dashboard",
   description: "Real-time CAN bus data visualization dashboard",
+  icons: {
+    icon: "/logo.svg"
+  }
 }
 
 export default function RootLayout({

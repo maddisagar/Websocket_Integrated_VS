@@ -18,7 +18,7 @@ import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 export default function Dashboard() {
-const [darkMode, setDarkMode] = useState(false)
+const [darkMode, setDarkMode] = useState(false) 
   const [currentView, setCurrentView] = useState("dashboard") // dashboard, graphs, history, reports
   const [dashboardTab, setDashboardTab] = useState("performance") // performance, vehicleControl, driveModes, safetySystems, systemControl, sensor, temperature
 
@@ -160,23 +160,52 @@ const [darkMode, setDarkMode] = useState(false)
         }
 
         .tab-btn {
-          background: rgb(247, 249, 248);
-          border: 1px solid rgb(0, 0, 0);
-          padding: 0.5rem 1rem;
-          border-radius: 8px;
+          background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+          border: none;
+          padding: 0.6rem 1.2rem;
+          border-radius: 12px;
           cursor: pointer;
-          font-weight: 600;
-          transition: background-color 0.3s ease;
+          font-weight: 700;
+          color: #333;
           white-space: nowrap;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+          user-select: none;
+          transform-origin: center;
+        }
+
+        .tab-btn::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(120deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 80%);
+          transform: skewX(-20deg);
+          transition: left 0.5s ease;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .tab-btn:hover::before {
+          left: 100%;
         }
 
         .tab-btn:hover {
-          background: rgba(34, 197, 94, 0.2);
+          box-shadow: 0 8px 15px rgba(34, 197, 94, 0.4);
+          color: #16a34a;
+          transform: scale(1.05);
         }
 
         .tab-btn.active {
-          background: #22c55e;
+          background: linear-gradient(135deg, #22c55e, #16a34a);
           color: white;
+          box-shadow: 0 8px 20px rgba(34, 197, 94, 0.7);
+          transform: scale(1.1);
+          z-index: 2;
         }
 
         .graph-controls {
@@ -218,7 +247,7 @@ const [darkMode, setDarkMode] = useState(false)
           .tab-btn {
             width: 100%;
             padding: 0.75rem 1rem;
-            font-size: 0.9rem;
+            font-size: 1rem;
           }
 
           .graph-controls {

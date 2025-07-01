@@ -275,7 +275,7 @@ export default function PerformanceMetrics() {
 
         .metric-card {
           background: rgba(255, 255, 255, 0.03);
-          border: 3px solid rgba(255, 255, 255, 0.1);
+          border: 3px solid #C0C1EF;
           border-radius: 12px;
           padding: 1.25rem;
           transition: all 0.3s ease;

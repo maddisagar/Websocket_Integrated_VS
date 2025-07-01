@@ -82,10 +82,20 @@
 .app.dark .graph-controls {
   background-color: #334155;
   border-radius: 12px;
+  padding: 0.25rem 0.5rem;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .app.dark .control-btn {
   color: #cbd5e1;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  min-width: 60px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .app.dark .control-btn:hover {

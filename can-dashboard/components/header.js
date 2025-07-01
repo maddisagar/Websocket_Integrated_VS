@@ -11,8 +11,8 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
       <header className="header">
         <div className="header-content">
           <div className="logo-section">
-            <div className="logo">
-              <Activity size={32} />
+            <div className="logo" onClick={() => setCurrentView("dashboard")} style={{ cursor: 'pointer' }}>
+              <img src="/logo.svg" alt="Logo" style={{ height: '100%', width: 'auto' }} />
             </div>
             <div className="title-section">
               <h1>DCU Dashboard</h1>
@@ -134,7 +134,7 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 1rem 2rem;
+          padding: 0.5rem 1rem;
           max-width: 1400px;
           margin: 0 auto;
         }
@@ -142,19 +142,20 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
         .logo-section {
           display: flex;
           align-items: center;
-          gap: 1rem;
+          gap: 1.5rem; /* increased gap for more padding */
         }
 
         .logo {
-          width: 50px;
-          height: 50px;
-          border-radius: 12px;
-          background: linear-gradient(135deg, #22c55e, #16a34a);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+          /* Make logo height fill the header content height */
+          height: 100%;
+          width: auto;
+          border-radius: 0;
+          background: none;
+          display: inline-block;
+          align-items: unset;
+          justify-content: unset;
+          color: unset;
+          box-shadow: none;
         }
 
         .title-section h1 {
@@ -313,7 +314,7 @@ export default function Header({ darkMode, toggleTheme, isConnected, currentView
 
         @media (max-width: 768px) {
           .header-content {
-            padding: 1rem;
+            padding: 0.5rem;
           }
           
           .desktop-nav {
