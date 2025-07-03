@@ -164,9 +164,21 @@ export default function EnhancedStatusCards({ showOnlyStatusGroups = false, show
           <div className="temp-grid">
             {temperatures.map((temp) => {
               const status = getTemperatureStatus(temp.value)
+              let IconComponent = CheckCircle
+              if (status === "critical" || status === "warning") {
+                IconComponent = AlertTriangle
+              }
+              // Add specific icons for each label if needed
+              if (temp.label.toLowerCase().includes("controller")) {
+                IconComponent = Power
+              }
+              if (temp.label.toLowerCase().includes("motor")) {
+                IconComponent = Thermometer
+              }
               return (
                 <div key={temp.key} className={`temp-card ${status}`}>
                   <div className="temp-header">
+                    <IconComponent size={20} style={{ marginRight: "0.5rem", color: status === "critical" ? "#ef4444" : status === "warning" ? "#f59e0b" : "#22c55e" }} />
                     <span className="temp-label">{temp.label}</span>
                     <div className={`temp-status-icon ${status}`}>
                       {status === "critical" ? (
@@ -206,7 +218,7 @@ export default function EnhancedStatusCards({ showOnlyStatusGroups = false, show
 
         .status-groups {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          grid-template-columns: repeat(4, 1fr);
           gap: 1.5rem;
         }
 
@@ -324,8 +336,8 @@ export default function EnhancedStatusCards({ showOnlyStatusGroups = false, show
 
         .sensor-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 0.75rem;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.5rem;
         }
 
         .sensor-item {
@@ -335,6 +347,13 @@ export default function EnhancedStatusCards({ showOnlyStatusGroups = false, show
           padding: 0.5rem 0.75rem;
           border-radius: 6px;
           font-size: 0.8rem;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          cursor: default;
+        }
+
+        .sensor-item:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
         }
 
         .sensor-item.healthy {
@@ -361,10 +380,34 @@ export default function EnhancedStatusCards({ showOnlyStatusGroups = false, show
           gap: 1rem;
         }
 
+        .temperature-section {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          border: 3px solid rgba(34, 197, 94, 0.2);
+          border-radius: 16px;
+          padding: 1.5rem;
+          width: 1100px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .temp-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
+        }
+
         .temp-card {
-          padding: 1rem;
+          padding: 0.5rem 2.5rem;
           border-radius: 12px;
           border: 1px solid;
+          font-size: 1.2rem;
+          font-weight: 700;
+        }
+
+        .temp-value .value {
+          font-weight: 700;
+          font-size: 1.5rem;
         }
 
         .temp-card.normal {

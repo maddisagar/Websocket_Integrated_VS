@@ -59,7 +59,7 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
               <Chart
                 data={history}
                 metric={metric}
-                height={fullView ? 300 : 200}
+                height={fullView ? 300 : 170}
                 darkMode={darkMode}
                 ref={(el) => (individualCanvasRefs.current[index] = el?.canvasRef?.current)}
               />
@@ -69,8 +69,8 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
 
         <style jsx>{`
           .graph-container {
-            margin-top: 2rem;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          margin-top: 0.5rem;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
           }
 
           .download-pdf-btn {
@@ -81,8 +81,10 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
 
           .graphs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            max-width: 960px;
+            margin: 0 auto;
           }
 
           .graphs-grid.full-view {
@@ -95,7 +97,7 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
             backdrop-filter: blur(20px);
             border: 1px solid rgba(34, 197, 94, 0.2);
             border-radius: 16px;
-            padding: 1.5rem;
+            padding: 1rem;
             transition: all 0.3s ease;
           }
 
@@ -118,8 +120,8 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
           @media (max-width: 480px) {
             .graphs-grid {
               grid-template-columns: 1fr;
-              gap: 1rem;
-            }
+          gap: 0.5rem;
+          }
 
             .graph-card {
               padding: 0.75rem;
@@ -164,8 +166,8 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
 
         <style jsx>{`
           .overlay-container {
-            margin-top: 2rem;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          margin-top: 0.5rem;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
           }
 
           .download-pdf-btn {
@@ -197,7 +199,8 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
           .metric-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.25rem;
+            margin: 0.25rem 0;
           }
 
           .metric-btn {
@@ -282,7 +285,7 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
                 <Chart
                   data={history}
                   metric={metric}
-                  height={250}
+          height={120}
                   darkMode={darkMode}
                   ref={(el) => (quadCanvasRefs.current[index] = el?.canvasRef?.current)}
                 />
@@ -293,8 +296,10 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
 
         <style jsx>{`
           .quad-container {
-            margin-top: 2rem;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          margin-top: 0.5rem;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          max-height: 80vh;
+          overflow-y: auto;
           }
 
           .download-pdf-btn {
@@ -316,8 +321,8 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
           .quad-selectors {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
           }
 
           .quad-selector {
@@ -333,7 +338,7 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
           }
 
           .quad-selector select {
-            padding: 0.5rem;
+            padding: 0.25rem 0.5rem;
             border: 1px solid rgba(34, 197, 94, 0.3);
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.05);
@@ -345,7 +350,7 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
           .quad-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
+          gap: 1rem;
           }
 
           .quad-chart {
@@ -353,7 +358,7 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
             backdrop-filter: blur(20px);
             border: 1px solid rgba(34, 197, 94, 0.2);
             border-radius: 16px;
-            padding: 1rem;
+            padding: 0.5rem;
           }
 
           @media (max-width: 768px) {
@@ -364,6 +369,11 @@ export default function GraphContainer({ mode, fullView = false, darkMode = true
             .quad-selectors {
               grid-template-columns: repeat(2, 1fr);
             }
+          }
+
+          .quad-container {
+            max-width: 100vw;
+            overflow-x: hidden;
           }
 
           @media (max-width: 480px) {

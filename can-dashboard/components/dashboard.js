@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useContext } from "react"
 import { useData } from "./data-context"
 import Header from "./header"
 import GraphContainer from "./graph-container"
 import HistoryView from "./history-view"
 import dynamic from "next/dynamic"
 import React, { Suspense } from "react"
+import { FooterContext } from "./FooterContext"
 
 const ReportsSection = dynamic(() => import("./reports-section.jsx"), { ssr: false })
 import { Activity, BarChart3, Grid3X3 } from "lucide-react"
@@ -18,7 +19,8 @@ import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 export default function Dashboard() {
-const [darkMode, setDarkMode] = useState(false) 
+  const { setFixed } = useContext(FooterContext)
+  const [darkMode, setDarkMode] = useState(false) 
   const [currentView, setCurrentView] = useState("dashboard") // dashboard, graphs, history, reports
   const [dashboardTab, setDashboardTab] = useState("performance") // performance, vehicleControl, driveModes, safetySystems, systemControl, sensor, temperature
 
@@ -30,6 +32,8 @@ const [darkMode, setDarkMode] = useState(false)
       }
     }
   }, [])
+
+  // Removed body class toggling for footer fixed as footer is now always fixed
   const [graphMode, setGraphMode] = useState("individual") // individual, overlay, quad
   const { isConnected } = useData()
 
@@ -155,7 +159,7 @@ const [darkMode, setDarkMode] = useState(false)
         .dashboard-tabs {
           display: flex;
           gap: 1rem;
-          margin-bottom: 1rem;
+          margin-bottom: 2.5rem;
           flex-wrap: wrap;
         }
 
@@ -196,7 +200,7 @@ const [darkMode, setDarkMode] = useState(false)
 
         .tab-btn:hover {
           box-shadow: 0 8px 15px rgba(34, 197, 94, 0.4);
-          color: #16a34a;
+          color: ##009164;
           transform: scale(1.05);
         }
 

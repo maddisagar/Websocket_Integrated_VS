@@ -4,6 +4,7 @@ import { useData } from "./data-context"
 import { TrendingUp, TrendingDown, Minus, Gauge, Zap, Activity } from "lucide-react"
 import Odometer from "./odometer"
 
+
 export default function PerformanceMetrics() {
   const { currentData, history, alerts } = useData()
 
@@ -80,7 +81,7 @@ export default function PerformanceMetrics() {
       unit: "V",
       trend: calculateTrend("DcBusVolt", "measurement617"),
       icon: Zap,
-      color: "#f59e0b",
+      color: "#FFD700",
       max: 500,
     },
     {
@@ -89,7 +90,7 @@ export default function PerformanceMetrics() {
       unit: "A",
       trend: calculateTrend("AcCurrMeaRms", "measurement617"),
       icon: Activity,
-      color: "#22c55e",
+      color: "#22c550",
       max: 100,
     },
     {
@@ -192,12 +193,16 @@ export default function PerformanceMetrics() {
                   <span className="unit">{metric.unit}</span>
                 </div>
 
-                <Odometer
-                  value={metric.value ?? 0}
-                  max={metric.max}
-                  unit={metric.unit}
-                  color={metric.color}
-                />
+                <>
+                  <div style={{ display: "flex", justifyContent: metric.title === "Motor Temperature" ? "flex-end" : "center", marginTop: "0.1rem" }}>
+<Odometer
+  value={metric.value ?? 0}
+  max={metric.max}
+  unit={metric.unit}
+  color={metric.color}
+/>
+                  </div>
+                </>
 
                 {/* Removed metric-range as odometer shows range visually */}
               </div>
@@ -269,16 +274,21 @@ export default function PerformanceMetrics() {
 
         .metrics-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 1.5rem;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 0.5rem;
+          align-items: stretch;
         }
 
         .metric-card {
           background: rgba(255, 255, 255, 0.03);
           border: 3px solid #C0C1EF;
           border-radius: 12px;
-          padding: 1.25rem;
+          padding: 0.5rem 0.75rem; /* reduced padding to resize box and remove spacing */
           transition: all 0.3s ease;
+          /* Removed fixed min-height to allow flexible height */
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
         }
 
         .metric-card:hover {
@@ -291,7 +301,7 @@ export default function PerformanceMetrics() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 1rem;
+          margin-bottom: 0.5rem;
         }
 
         .metric-icon {
@@ -309,16 +319,20 @@ export default function PerformanceMetrics() {
         }
 
         .metric-content h4 {
-          margin: 0 0 0.5rem 0;
+          margin: 0 0 0.25rem 0;
           font-size: 0.9rem;
           opacity: 0.8;
+          min-height: 1.2rem; /* Added to align all attribute names */
+          display: flex;
+          align-items: center;
+          height: 1.2rem;
         }
 
         .metric-value {
           display: flex;
           align-items: baseline;
           gap: 0.5rem;
-          margin-bottom: 1rem;
+          margin-bottom: 0.25rem;
         }
 
         .metric-value .value {
