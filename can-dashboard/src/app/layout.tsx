@@ -15,10 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body
-        className="antialiased"
-        style={{ margin: 0, minHeight: "100vh", display: "flex", flexDirection: "column" }}
-      >
+      <body className="antialiased root-body">
         <FooterProvider>
           <ClientLayoutContent>{children}</ClientLayoutContent>
         </FooterProvider>
